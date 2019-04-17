@@ -1,0 +1,48 @@
+table th {
+    text-align: center;
+    background: none;
+}
+
+.A4 div label.control-label {
+    font-weight: normal;
+}
+
+#divPrint{
+    font-family: "Microsoft YaHei";
+}
+
+table.table-print th, table.table-print td{
+    border: 1px solid black!important;
+    padding: 5px;
+}
+.A4 div table thead tr th{
+    padding-top: 2px;
+    padding-bottom: 0px;
+    font-weight: normal;
+    
+}
+.A4 div table tbody tr td{
+    padding-top: 2px;
+    padding-bottom: 0px;
+    
+}
+.printHr {
+    padding-top: 0px;
+    margin-top: 0px;
+    margin-bottom: 1px;
+    border-top-width: 1px; 
+    border-top-style: solid; 
+    border-top-color: black;
+}
+
+div#addVinsModal div.dataTables_scrollBody{
+    height: 310px!important;
+}
+
+div#addVinsModal div.dataTables_scrollHeadInner{
+    width: auto!important;
+}
+
+div#addVinsModal th{
+    text-align: center!important;
+}

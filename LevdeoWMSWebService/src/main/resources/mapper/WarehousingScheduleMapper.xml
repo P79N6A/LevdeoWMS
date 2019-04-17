@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.WarehousingScheduleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.WarehousingSchedule">
+        <id column="vin" property="vin" />
+        <result column="wsTransition" property="wsTransition" />
+        <result column="matCode" property="matCode" />
+        <result column="finishedTime" property="finishedTime" />
+        <result column="stockPosition" property="stockPosition" />
+        <result column="state" property="state" />
+        <result column="sapTransfer" property="sapTransfer" />
+        <result column="productStockCode" property="productStockCode" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+        <result column="sapUserCode" property="sapUserCode" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        wsTransition, vin, matCode, finishedTime, stockPosition, state, sapTransfer, productStockCode, createId, createTime, updateId, updateTime, sapUserCode
+    </sql>
+
+</mapper>

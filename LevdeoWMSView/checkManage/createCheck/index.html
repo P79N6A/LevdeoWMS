@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>新建计划</title>
+
+    <!-- 共通css -->
+    <script src="../../common/commoncss.js"></script>
+</head>
+
+<body>
+    <ol class="breadcrumb pull-right">
+        <li><a href="javascript:;">盘点管理</a>
+        </li>
+        <li><a href="javascript:;">新建计划</a>
+        </li>
+    </ol>
+    <h2 class="page-header">新建计划</h2>
+    <hr />
+    <div id="myHeader" class="row">
+        <form class="form-horizontal" id="newCheckForm">
+            <div class="form-horizontal">
+                <div class="form-group col-sm-4">
+                    <label class="col-sm-3 control-label myRequired">盘点日</label>
+                    <div class="col-sm-9">
+                        <input type="text" id="iptCheckDate" class="form-control validate[required]">
+                    </div>
+                </div>
+                <div class="form-group col-sm-4"></div>
+                <div class="form-group col-sm-4">
+                    <div class="row pull-right">
+                        <button type="button" id="btnSave" class="btn btn-success">保存</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="myContent" class="row">
+        <div class="col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <table id="tableBox" class="table table-bordered table-datas" style="min-width:100%">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 共通js -->
+    <script src="../../common/commonjs.js"></script>
+    <script src="js/controller.js"></script>
+</body>
+
+</html>

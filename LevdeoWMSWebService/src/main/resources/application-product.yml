@@ -1,0 +1,42 @@
+#============ 数据库配置#======================================
+spring:
+  datasource:
+    url: jdbc:sqlserver://192.168.117.222:1433;DatabaseName=wms
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: sa
+    password: ENC(spK/+eZDyh7VfOeZRM7ZHA==)
+
+
+  #启动Spring MVC多文件上传
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 0
+      location: /usr/local/LevdeoWms/upload        #指定默认上传的文件夹
+      max-file-size: 5MB      #限制单个文件最大大小
+      max-request-size: 20MB  #限制所有文件最大大小
+      resolve-lazily: false   #是否延迟多部件文件请求的参数和文件的解析
+
+#
+mybatis-plus:
+  configuration:
+    cache-enabled: true
+    lazy-loading-enabled: true
+    multiple-result-sets-enabled: true
+    use-column-label: true
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+    jdbc-type-for-null: null
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+#==================== 日志配合·标准  ===========================
+logging:
+  config: classpath:logback-spring-product.xml
+
+#自己配置
+my:
+  #条码路径
+  barcodepath: /usr/local/LevdeoWms/barcode/
+  #同步 物料主数据、客户主数据 job执行时间每个整点执行一次：秒、分、时、月份中的几号、月份、星期几(周天:1)、年份(1970-2099 可缺省)
+  sapSyncWmsScheduleconn: 0 0 0/2 * * ?
+

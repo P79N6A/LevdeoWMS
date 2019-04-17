@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>仓库管理</title>
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+	<meta content="" name="description">
+	<meta content="" name="author">
+
+	<!-- 共通css -->
+	<script src="../../common/commoncss.js"></script>
+</head>
+
+<body>
+	<ol class="breadcrumb pull-right">
+		<li><a href="javascript:;">系统设置</a>
+		</li>
+		<li><a href="javascript:;">仓库管理</a>
+		</li>
+	</ol>
+	<h2 class="page-header">仓库管理</h2>
+	<hr />
+	<div id="rrapp" v-cloak>
+		<div v-show="showList">
+			<div id="myHeader" class="row">
+				<form class="form-horizontal">
+					<div class="form-group col-sm-4">
+						<label class="col-sm-2 control-label">仓库</label>
+						<div class="col-sm-9">
+							<select id="selWareHouse" data-live-search="false" class="form-control" data-type="WAREHOUSE_LIST">
+							</select>
+						</div>
+					</div>
+					<div class="form-group col-sm-8">
+						<div class="row pull-right">
+							<button type="button" id="btnSearch" class="btn btn-primary">查询</button>
+							<button type="button" class="btn btn-success" @click="add">新建</button>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div id="myContent" class="row">
+				<div class="col-xs-12">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<table id="tableBox" class="table table-bordered table-hover table-datas" style="min-width:100%"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div v-show="!showList">
+			<div id="myDetail">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="control-label col-sm-2">仓库编号</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="house.warehouseCode" maxlength="20" readonly="true">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label myRequired">仓库名</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control validate[required]" maxlength="20" v-model="house.name">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label myRequired">地址</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control validate[required]" maxlength="50" v-model="house.address">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label myRequired">负责人</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control validate[required]" maxlength="20" v-model="house.contact">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label myRequired">电话</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control validate[required,custom[phone]]" maxlength="20" v-model="house.phoneNo" >
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">备注</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control col-sm-3" maxlength="50" v-model="house.remark">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">停车策略</label>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label myRequired">第一优先级</label>
+						<div class="col-sm-4">
+							<select id="priorityLV1" data-live-search="false" class="form-control validate[required]" data-type="PRIORITY_LIST">
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label myRequired">第二优先级</label>
+						<div class="col-sm-4">
+							<select id="priorityLV2" data-live-search="false" class="form-control validate[required]" data-type="PRIORITY_LIST">
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label myRequired">第三优先级</label>
+						<div class="col-sm-4">
+							<select id="priorityLV3" data-live-search="false" class="form-control validate[required]" data-type="PRIORITY_LIST">
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-10 col-sm-offset-2">
+							<button type="button" class="btn btn-success" @click="saveOrUpdate">保存</button>
+							<button type="button" class="btn btn-danger" @click="del" v-show="showDelete">删除</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- 共通js -->
+	<script src="../../common/commonjs.js"></script>
+	<script src="js/controller.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.SysStockPositionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.SysStockPosition">
+        <id column="stockPosition" property="stockPosition" />
+        <result column="stockAreaCode" property="stockAreaCode" />
+        <result column="name" property="name" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+        <result column="inUse" property="inUse" />
+        <result column="isLock" property="isLock" />
+        <result column="lockReason" property="lockReason" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        stockPosition, stockAreaCode, name, createId, createTime, updateId, updateTime, inUse, isLock, lockReason
+    </sql>
+
+    <!-- 通用查询条件 -->
+	<sql id="Where_Clause">
+		where 1=1
+		<if test="stockArea != null and stockArea !=''" >
+			AND lv2.stockAreaCode = #{stockArea}
+		</if>
+
+		<if test="warehouse != null and warehouse !=''" >
+			AND lv1.warehouseCode = #{warehouse}
+		</if>
+
+		<if test="spUseStatus != null and spUseStatus !=''" >
+			AND lv3.inUse = #{spUseStatus}
+		</if>
+
+		<if test="spLockStatus != null and spLockStatus !=''" >
+			AND lv3.isLock = #{spLockStatus}
+		</if>
+
+	</sql>
+
+	<!--
+		库位列表查询
+		三级结构：
+		仓库(lv1)-库区(lv2)-库位(lv3)
+	 -->
+	<select id="getPositionList" parameterType="com.tre.jdevtemplateboot.web.pojo.StockPositionParameterBean" resultType="hashmap">
+		select 
+			lv3.stockPosition positionId,
+			lv3.name position,
+			lv1.warehouseCode warehouseId,
+			lv1.name warehouse,
+			lv2.name stockArea,
+			lv3.stockAreaCode,
+			CASE
+				WHEN lv2.flag='0'
+			 	  THEN '临时库区'
+				WHEN lv2.flag='1'
+				  THEN '固定库区'
+			END AS flagName,
+			sys.subName as ssubName,
+			sys2.subName isLock,
+			lv3.lockReason
+		from 
+			sysStockPosition lv3
+
+		left join sysStockArea lv2
+			on lv3.stockAreaCode = lv2.stockAreaCode
+
+		left join sysWarehouse lv1
+			on lv1.warehouseCode = lv2.warehouseCode
+
+		left join sysParm sys
+			on sys.subCode = lv3.inUse
+			and sys.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_IN_USE}'
+
+		left join sysParm sys2
+			on sys2.subCode = lv3.isLock
+			and sys2.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_LOCK_STATUS}'
+
+		<include refid="Where_Clause"></include>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+	</select>
+
+	<!-- 查询仓库优先级 -->
+	<select id="getPrioritys" parameterType="string" resultType="hashmap" >
+		SELECT 
+			w.priorityLV1,
+			w.priorityLV2,
+			w.priorityLV3,
+			p1.subName priorityName1,
+			p2.subName priorityName2,
+			p3.subName priorityName3 
+		FROM sysWarehouse w
+
+		INNER JOIN sysParm p1
+			ON p1.subCode = w.priorityLV1
+			AND p1.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_PARKING_POLICY}'
+
+		INNER JOIN sysParm p2
+			ON p2.subCode = w.priorityLV2
+			and p2.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_PARKING_POLICY}'
+
+		INNER JOIN sysParm p3
+			ON p3.subCode = w.priorityLV3
+			AND p3.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_PARKING_POLICY}'
+
+		WHERE w.warehouseCode = #{_parameter}
+	</select>
+	
+	<!-- 查询颜色优先级 -->
+	<select id="getColorPriority" resultType="hashmap">
+		select code,name from mainColor
+	</select>
+	
+	<!-- 查询品牌优先级 -->
+	<select id="getBrandPriority" resultType="hashmap">
+		select code,name from mainBrand
+	</select>
+	
+	<!-- 查询系列优先级 -->
+	<select id="getSeriesPriority" resultType="hashmap">
+		select code,name from mainSeries
+	</select>
+	
+	<!-- 查询仓库列表 -->
+	<select id="getWarehouse" resultType="hashmap">
+		select warehouseCode,name from sysWarehouse
+	</select>
+	
+	<!-- 查询库区列表 -->
+	<select id="getStockArea" resultType="hashmap">
+		select stockAreaCode,name from sysStockArea
+		<where>
+			<if test="warehouseCode != null and warehouseCode != ''">
+				warehouseCode = #{warehouseCode}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 从库区批量插入库位 -->
+	<insert id="insertList" useGeneratedKeys="true" keyProperty="stockPosition" parameterType="java.util.List">
+        insert into sysStockPosition
+        			(
+        			stockPosition,
+        			stockAreaCode,
+        			name,
+        			createId,
+        			createTime,
+        			updateId,
+        			updateTime,
+        			inUse,
+        			isLock
+        			) VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+					(
+					#{item.stockPosition},
+					#{item.stockAreaCode},
+					#{item.name},
+					#{item.createId},
+					GETDATE(),
+					#{item.updateId},
+					#{item.updateTime},
+					#{item.inUse},
+					#{item.isLock}
+					)
+        </foreach>       
+    </insert>	
+
+	<!-- 删除检证 -->
+	<select id="delTest" parameterType="com.tre.jdevtemplateboot.domain.po.SysStockPosition" resultType="int">
+		select count(*) from sysStockPosition
+		where stockAreaCode = #{stockAreaCode}
+			  and name >#{name}
+			  and inUse='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_IN_USE}'
+	</select>
+
+	<!-- 删除 list-->
+	<delete id="deleteList" parameterType="com.tre.jdevtemplateboot.domain.po.SysStockPosition">
+		delete from sysStockPosition
+		where stockAreaCode = #{stockAreaCode}
+			  and name >#{name}
+	</delete>
+	<!--仅根据库区编码删除 -->
+	<delete id="deleteBycode" parameterType="String">
+		delete from sysStockPosition
+		where stockAreaCode = #{code} 
+	</delete>
+</mapper>

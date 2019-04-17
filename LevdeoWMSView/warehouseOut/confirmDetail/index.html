@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>随车物料确认</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+
+</head>
+
+<body>
+  <div id="myBreadcrumb" v-cloak>
+    <ol class="breadcrumb pull-right">
+      <li><a href="javascript:;">出库管理</a>
+      </li>
+      <li><a href="javascript:;">{{pageName}}</a>
+      </li>
+    </ol>
+    <h2 class="page-header">{{pageName}}</h2>
+  </div>
+  <hr />
+  <div id="myHeader" class="row" v-cloak>
+    <div class="form-horizontal">
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">客户名称</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{customerName}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">销售出库单</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{outBoundCode}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">货运方式</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{shipTypeName}}</label>
+        </div>
+      </div>
+
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">联系电话</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{contactInformation}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">销售发货单</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel" id="sapInvoiceCode">{{sapInvoiceCode}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">物流车位</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{logisticsParking}}</label>
+        </div>
+      </div>
+
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">客户地址</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{customerAddress}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">随车物料</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{giftName}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">物流车号</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{logisticsVehicleNo}}</label>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">物流公司</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel">{{logisCompanyName}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">配件确认人</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel" id="giftStatus">{{giftChecker}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label">宣传品确认人</label>
+        <div class="col-sm-8">
+          <label class="control-label myLabel" id="proStatus">{{proChecker}}</label>
+        </div>
+      </div>
+      <div class="form-group col-sm-12">
+        <div class="row pull-right">
+          <button type="button" class="btn btn-success" v-show="showPc" @click="doConfirmPc">确认</button>
+          <button type="button" class="btn btn-success" v-show="showFc" @click="doConfirmFc">确认</button>
+          <button type="button" class="btn btn-success" v-show="false"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="myContent" class="row">
+    <div class="col-xs-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <table id="tableBox" class="table table-bordered table-datas" style="min-width:100%"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

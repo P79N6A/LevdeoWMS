@@ -1,0 +1,24 @@
+document.write('<script src="../../assets/plugins/jquery/jquery.min.js"></script>');
+document.write('<script src="../../assets/plugins/bootstrap/js/bootstrap.min.js"></script>');
+document.write('<script src="../../assets/plugins/bootstrap/js/bootstrap-select.min.js"></script>');
+document.write('<script src="../../assets/plugins/bootstrap/js/bootstrap-datetimepicker.min.js"></script>');
+document.write('<script src="../../assets/plugins/bootstrap/js/local/bootstrap-datetimepicker.zh-CN.js"></script>');
+document.write('<script src="../../assets/plugins/jquery.datatables/js/jquery.dataTables.min.js"></script>');
+document.write('<script src="../../assets/plugins/jquery.validationEngine/js/jquery.validationEngine.js"></script>');
+document.write('<script src="../../assets/plugins/jquery.validationEngine/js/languages/jquery.validationEngine-zh_CN.js"></script>');
+document.write('<script src="../../assets/plugins/jquery/jquery.jqprint-0.3.js"></script>');
+document.write('<script src="../../assets/plugins/jquery/jquery-migrate-1.2.1.min.js"></script>');
+document.write('<script src="../../assets/plugins/select2/select2.js"></script>');
+document.write('<script src="../../assets/plugins/toastr/js/toastr.min.js"></script>');
+document.write('<script src="../../assets/js/ui.min.js"></script>');
+document.write('<script src="../../assets/js/vue.min.js"></script>');
+document.write('<script src="../../assets/js/ajaxfileupload.js"></script>');
+document.write('<script src="../../assets/js/multiselect.js"></script>');
+//业务用
+document.write('<script src="../../common/sysParamConstant.js"></script>');
+document.write('<script src="../../common/constant.js"></script>');
+document.write('<script src="../../common/messageConstant.js"></script>');
+document.write('<script src="../../common/common.js"></script>');
+document.write('<script src="../../common/selectProp.js"></script>');
+document.write('<script src="../../common/selectInit.js"></script>');
+document.write('<script src="../../common/limitInput.js"></script>');

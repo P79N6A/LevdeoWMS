@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.tre.jdevtemplateboot.mapper.SysSpPriorityDataMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap"
+		type="com.tre.jdevtemplateboot.domain.po.SysSpPriorityData">
+		<id column="stockPosition" property="stockPosition" />
+		<result column="priorityId" property="priorityId" />
+		<result column="priorityRule" property="priorityRule" />
+		<result column="createId" property="createId" />
+		<result column="createTime" property="createTime" />
+		<result column="updateId" property="updateId" />
+		<result column="updateTime" property="updateTime" />
+	</resultMap>
+
+	<!-- 通用查询结果列 -->
+	<sql id="Base_Column_List">
+		stockPosition, priorityId, priorityRule, createId, createTime, updateId, updateTime
+	</sql>
+	
+	<!-- 根据库位号删除 -->
+	<delete id="deleteBycode" parameterType="String">
+		DELETE sppd
+		FROM sysSpPriorityData sppd 
+		INNER JOIN sysStockPosition sp 
+			ON sppd.stockPosition=sp.stockPosition
+			AND sp.stockAreaCode = #{code}
+	</delete>
+	
+	<!-- 获取库位-根据优先级规则 -->
+	<select id="getSpByPrioRule" resultType="java.util.Map">
+      with #splist as (
+		SELECT
+			pd.stockPosition,sp.name,pd.priorityId,1 odrc
+		FROM sysSpPriorityData pd
+
+		INNER JOIN sysStockPosition sp
+			ON pd.stockPosition=sp.stockPosition
+			AND sp.inUse = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_NOT_USE}'
+			AND sp.isLock = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_LOCK_OFF}'
+
+		INNER JOIN sysStockArea sa
+			ON sa.stockAreaCode = sp.stockAreaCode
+
+		INNER JOIN sysWarehouse w
+			ON w.warehouseCode = sa.warehouseCode
+			AND w.warehouseCode = #{warehouseCode}
+
+		WHERE pd.priorityRule = #{priorityRule}
+
+		union all
+
+		SELECT top 1
+			sp.stockPosition,sp.name,0,2
+		FROM sysStockPosition sp
+
+		INNER JOIN sysStockArea sa
+			ON sa.stockAreaCode = sp.stockAreaCode
+
+		WHERE 	sa.warehouseCode = #{warehouseCode}
+		  		AND sp.inUse = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_NOT_USE}'
+		  		AND sa.flag=0
+      )
+      SELECT a.stockPosition,a.name
+      FROM #splist a
+      order by a.odrc,a.priorityId,a.stockPosition
+	</select>
+</mapper>

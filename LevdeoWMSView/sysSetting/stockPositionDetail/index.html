@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>库位管理</title>
+
+    <!-- 共通css -->
+    <script src="../../common/commoncss.js"></script>
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <ol class="breadcrumb pull-right">
+        <li><a href="javascript:;">系统设置</a>
+        </li>
+        <li><a href="javascript:;">库位管理</a>
+        </li>
+    </ol>
+    <h2 class="page-header">库位管理</h2>
+    <hr />
+    <div id="myHeader" class="row">
+        <div class="form-horizontal">
+            <div class="form-group col-sm-4">
+                <label class="col-sm-4 control-label">库区名称</label>
+                <div class="col-sm-8">
+                    <label class="control-label" id="labstockArea"></label>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-4 control-label">库位编号</label>
+                <div class="col-sm-8">
+                    <label class="control-label" id="labPositionId"></label>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-4 control-label">库位名称</label>
+                <div class="col-sm-8">
+                    <label class="control-label" id="labPosition"></label>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-4 control-label">使用状态</label>
+                <div class="col-sm-8">
+                    <label class="control-label" id="isUse"></label>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-4 control-label">锁定状态</label>
+                <div class="col-sm-8">
+                    <label class="control-label" id="isLock"></label>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-4 control-label">锁定理由</label>
+                <div class="col-sm-8">
+                    <label class="control-label" id="lockReason"></label>
+                </div>
+            </div>
+            <div class="form-group col-sm-12">
+                <div class="row pull-right">
+                    <button type="button" id="btnCopy" class="btn btn-success" style="display: none">复制</button>
+                    <button type="button" id="btnSave" class="btn btn-success" style="display: none">保存</button>
+                    <button type="button" id="btnUnlock" class="btn btn-success" style="display: none">解锁</button>
+                    <button type="button" id="btnLock" class="btn btn-success" style="display: none">锁定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="myContent" class="row">
+        <form id="valiForm">
+            <div id="parDiv">
+
+            
+            <div class="col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h3 class="control-label">第一优先级：<span id="priorityName1"></span></h3>
+                                <input type="hidden" id="priorityLV1" class="priorityLV">
+                            </div>
+                            <div class="col-xs-4">
+                                <select name="from" id="multiselect_1" class="form-control" size="8" multiple="multiple"
+                                    data-right="#multiselect_to_1" data-right-all="#right_All_1"
+                                    data-right-selected="#right_Selected_1" data-left-selected="#left_Selected_1"
+                                    data-left-all="#left_All_1">
+                                </select>
+                            </div>
+
+                            <div class="col-xs-1">
+                                <button type="button" id="right_All_1" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-forward"></i></button>
+                                <button type="button" id="right_Selected_1" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-chevron-right"></i></button>
+                                <button type="button" id="left_Selected_1" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-chevron-left"></i></button>
+                                <button type="button" id="left_All_1" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-backward"></i></button>
+                            </div>
+
+                            <div class="col-xs-4">
+                                <select name="to" id="multiselect_to_1" class="form-control  validate[required]"
+                                    size="8" multiple="multiple"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h3 class="control-label">第二优先级：<span id="priorityName2"></span></h3>
+                                <input type="hidden" id="priorityLV2" class="priorityLV">
+                            </div>
+                            <div class="col-xs-4">
+                                <select name="from" id="multiselect_2" class="form-control" size="8" multiple="multiple"
+                                    data-right="#multiselect_to_2" data-right-all="#right_All_2"
+                                    data-right-selected="#right_Selected_2" data-left-selected="#left_Selected_2"
+                                    data-left-all="#left_All_2">
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <button type="button" id="right_All_2" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-forward"></i></button>
+                                <button type="button" id="right_Selected_2" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-chevron-right"></i></button>
+                                <button type="button" id="left_Selected_2" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-chevron-left"></i></button>
+                                <button type="button" id="left_All_2" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-backward"></i></button>
+                            </div>
+
+                            <div class="col-xs-4">
+                                <select name="to" id="multiselect_to_2" class="form-control  validate[required]"
+                                    size="8" multiple="multiple"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <h3 class="control-label">第三优先级：<span id="priorityName3"></span></h3>
+                                <input type="hidden" id="priorityLV3" class="priorityLV">
+                            </div>
+                            <div class="col-xs-4">
+                                <select name="from" id="multiselect_3" class="form-control" size="8" multiple="multiple"
+                                    data-right="#multiselect_to_3" data-right-all="#right_All_3"
+                                    data-right-selected="#right_Selected_3" data-left-selected="#left_Selected_3"
+                                    data-left-all="#left_All_3">
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <button type="button" id="right_All_3" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-forward"></i></button>
+                                <button type="button" id="right_Selected_3" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-chevron-right"></i></button>
+                                <button type="button" id="left_Selected_3" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-chevron-left"></i></button>
+                                <button type="button" id="left_All_3" class="btn btn-block"><i
+                                        class="glyphicon glyphicon-backward"></i></button>
+                            </div>
+                            <div class="col-xs-4">
+                                <select name="to" id="multiselect_to_3" class="form-control  validate[required]"
+                                    size="8" multiple="multiple"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+
+
+    <div class="modal fade" id="myModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+        aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">锁定库位</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal" id="modalLabel">
+                        <form id="modalForm">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">库位编号</label>
+                                <div class="col-sm-8">
+                                    <label class="control-label myLabel" id="mdlPositionCode"></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">库位名称</label>
+                                <div class="col-sm-8">
+                                    <label class="control-label myLabel" id="mdlPositionName"></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label myRequired">锁定理由</label>
+                                <div class="col-sm-6">
+                                    <input class="form-control validate[required,maxSize[50]]" id="mdlLockReason">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        关闭
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnModalSure">
+                        确定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myModalCopy" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+        aria-hidden="true">
+        <div class="modal-dialog" style="width: 500px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">复制</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <form id="modalCopyForm">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">模板库位</label>
+                                <div class="col-sm-6">
+                                    <label class="control-label myLabel" id="copyTemplate"></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label myRequired">起始库位</label>
+                                <div class="col-sm-6">
+                                    <select id="copyStartSp" data-live-search="false"
+                                        class="form-control validate[required]" data-typecopy="MODAL_SP"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label myRequired">终止库位</label>
+                                <div class="col-sm-6">
+                                    <select id="copyEndSp" data-live-search="false"
+                                        class="form-control validate[required,funcCall[checkStartEnd]]"
+                                        data-typecopy="MODAL_SP"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label myRequired">覆盖已有规则</label>
+                                <div class="col-sm-6">
+                                    <input type="radio" class="radioBtn" name="radioChoose" value="radioYes">
+                                    <label for="fixed" class="control-label">是</label>
+                                    <input type="radio" class="radioBtn" name="radioChoose" value="radioNo" checked
+                                        style="margin-left:30px">
+                                    <label for="changed" class="control-label">否</label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        关闭
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnCopySure">
+                        确定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 共通js -->
+    <script src="../../common/commonjs.js"></script>
+    <script src="js/controller.js"></script>
+</body>
+
+</html>

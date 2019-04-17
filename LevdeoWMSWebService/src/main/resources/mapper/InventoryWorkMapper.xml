@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.InventoryWorkMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.InventoryWork">
+        <result column="vin" property="vin" />
+        <result column="carResult" property="carResult" />
+        <result column="keyResult" property="keyResult" />
+        <result column="checkPerson" property="checkPerson" />
+        <result column="checkTime" property="checkTime" />
+        <result column="operator" property="operator" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        vin, carResult, keyResult, checkPerson, checkTime, operator
+    </sql>
+    
+    <!-- 根据登录人清空盘点临时表 -->
+	<delete id="deleteInventoryWork">
+		DELETE FROM inventoryWork WHERE operator = #{_parameter}
+	</delete>
+	
+</mapper>

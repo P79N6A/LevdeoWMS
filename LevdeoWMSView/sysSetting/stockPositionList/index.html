@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>库位管理</title>
+
+    <!-- 共通css -->
+    <script src="../../common/commoncss.js"></script>
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <ol class="breadcrumb pull-right">
+        <li><a href="javascript:;">系统设置</a>
+        </li>
+        <li><a href="javascript:;">库位管理</a>
+        </li>
+    </ol>
+    <h2 class="page-header">库位管理</h2>
+    <hr/>
+
+    <div id="myHeader" class="row">
+        <div class="form-horizontal">
+            <div class="form-group col-sm-4">
+                <label class="col-sm-3 control-label">仓库</label>
+                <div class="col-sm-9">
+                    <select id="selWarehouse" data-live-search="false" class="form-control">
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-3 control-label">库区</label>
+                <div class="col-sm-9">
+                    <select id="selStockArea" data-live-search="false" class="form-control" data-type="STOCK_AREA_LIST">
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-3 control-label">状态</label>
+                <div class="col-sm-9">
+                    <select id="selUseStatus" data-live-search="false" class="form-control" data-type="SP_USE_STATUS">
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-3 control-label">锁定</label>
+                <div class="col-sm-9">
+                    <select id="selLockStatus" data-live-search="false" class="form-control" data-type="SP_LOCK_STATUS">
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group col-sm-8">
+                <div class="row pull-right">
+                    <button type="button" id="btnSearch" class="btn btn-primary">查询</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="myContent" class="row">
+        <div class="col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <table id="tableBox" class="table table-bordered table-hover table-datas" style="min-width:100%">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="page" class="m-pagination"></div>
+
+    <!-- 共通js -->
+    <script src="../../common/commonjs.js"></script>
+    <script src="js/controller.js"></script>
+</body>
+
+</html>

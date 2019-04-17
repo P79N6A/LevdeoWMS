@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>车辆入库</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+  <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <ol class="breadcrumb pull-right">
+    <li><a href="javascript:;">入库管理</a>
+    </li>
+    <li><a href="javascript:;">车辆入库</a>
+    </li>
+  </ol>
+  <h2 class="page-header">车辆入库</h2>
+  <hr />
+  <div id="myHeader" class="row">
+    <form class="form-horizontal">
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label myRequired">作业员</label>
+        <div class="col-sm-4" style="padding-right:0;">
+          <input type="text" id="iptUcode" onkeydown="funkeydown();" onfocus="getInitVal();" onblur="chkdiffVal();"
+            class="form-control inpleft validate[required, funcCall[chkuser]]">
+        </div>
+        <div class="col-sm-4" style="padding-left:0;">
+          <input type="text" id="iptUname" class="form-control inpright" readonly />
+        </div>
+        <!-- <label class="col-sm-2 control-label" id="lb_Uname"></label>-->
+      </div>
+    </form>
+    <div class="form-group col-sm-4 pull-right">
+      <div class="row pull-right">
+        <form id="uploadForm" style="display:none">
+          <input id="fileToUpload" name="file" type="file" accept="*.csv" class="input" style="display:none">
+        </form>
+        <button type="button" id="btnImport" class="btn btn-success">导入</button>
+        <button type="button" id="btnSave" class="btn btn-success">保存</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script id="tbhead1" type="text/html">
+    <tr>
+      <th width="60px">序号</th>
+      <th width="">VIN码</th>
+      <th width="">物料编码</th>
+      <th width="">物料描述</th>
+      <th width="">库位号</th>
+      <th width="">成品库</th>
+      <th width="40px">删除</th>
+    </tr>
+  </script>
+  <script id="tbhead2" type="text/html">
+    <tr>
+        <th width="60px">序号</th>
+        <th width="">VIN码</th>
+        <th width="">物料编码</th>
+        <th width="">物料描述</th>
+        <th width="">库位号</th>
+        <th width="">成品库</th>
+        <th width="40px">删除</th>
+      <th width="6px" style="padding:0;"></th>
+    </tr>
+  </script>
+
+  <div id="myContent" class="row">
+    <div class="col-xs-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <table id="tableBox" v-cloak class="table table-bordered table-datas fixedHead">
+            <thead>
+              <tr>
+                <th width="60px">序号</th>
+                <th width=''>VIN码</th>
+                <th width=''>物料编码</th>
+                <th width="">物料描述</th>
+                <th width=''>库位号</th>
+                <th width="">成品库</th>
+                <th width='40px'>删除</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item,index) in items">
+                <td width="60px" style="text-align:right;">{{index+1}} </td>
+                <td width="" class="nopadding"><input id="iptVin" name="iptVin" type="text" class="form-control"
+                    onkeydown="funwskeydown(this);" onfocus="getwsInitVal(this);" onblur="chkwsdiffVal(this);"  v-model="item.vin"
+                    v-bind:readonly="item.readonly" style="background-color:rgb(250, 255, 189);">
+                </td>
+                <td width="">{{item.matCode}}</td>
+                <td width="" class="textover" v-bind:title="item.matDescription">{{item.matDescription}}</td>
+                <td width="">{{item.stockPosition}}</td>
+                <td width="">{{item.productStockName}}</td>
+                <td width="40px"><i @click="deleteRow(index)" class="del-btn fa fa-trash-o text-danger" style="cursor:pointer"></i></td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div id="page" class="m-pagination"></div>
+  <!-- 结束 #page-container 页面容器 -->
+
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

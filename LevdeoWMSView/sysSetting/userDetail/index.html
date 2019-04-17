@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+</head>
+
+<body>
+  <ol class="breadcrumb pull-right">
+    <li><a href="javascript:;">系统设置</a></li>
+    <li><a href="javascript:;">作业员管理</a></li>
+  </ol>
+  <h2 class="page-header">作业员管理</h2>
+  <hr />
+  <div id="myContent" v-cloak>
+    <form class="form-horizontal">
+      <!-- 作业员编号输入框 -->
+      <div class="form-group">
+        <label class="col-sm-2 control-label myRequired">作业员编号</label>
+        <div class="col-sm-4">
+          <input type="text" id="userCode" maxlength="20" class="form-control validate[required,custom[onlyLetterNumber]]"
+            v-model="formdata.userCode" v-bind:disabled="userCodeDisabled">
+        </div>
+      </div>
+      <!-- 作业员姓名输入框 -->
+      <div class="form-group">
+        <label class="col-sm-2 control-label myRequired">作业员姓名</label>
+        <div class="col-sm-4">
+          <input type="text" id="userName" class="form-control validate[required]" maxlength="10" v-model="formdata.userName">
+        </div>
+      </div>
+      <!-- 电话输入框 -->
+      <div class="form-group">
+        <label class="col-sm-2 control-label myRequired">电话</label>
+        <div class="col-sm-4">
+          <input type="text" id="userPhone" maxlength="20" class="form-control validate[required,custom[phone]]"
+            v-model="formdata.phone">
+        </div>
+      </div>
+      <!-- 角色下拉列表 -->
+      <div class="form-group">
+        <label class="col-sm-2 control-label myRequired">角色</label>
+        <div class="col-sm-4">
+          <select id="operateRole" data-type="ROLE_TYPE" class="form-control validate[required]"></select>
+        </div>
+      </div>
+      <!-- 仓库下拉列表-->
+      <div class="form-group">
+        <label class="col-sm-2 control-label myRequired">所属仓库</label>
+        <div class="col-sm-4">
+          <select id="warehouse" data-type="WAREHOUSE_LIST" class="form-control validate[required]"></select>
+        </div>
+      </div>
+      <!-- 当前状态-->
+      <div class="form-group">
+        <label class="col-sm-2 control-label myRequired">状态</label>
+        <div class="col-sm-4">
+          <select id="accountStatus" data-type="ACCOUNT_STATUS_LIST" class="form-control validate[required]"></select>
+        </div>
+      </div>
+      <!-- sap账号 -->
+      <div class="form-group">
+        <label class="col-sm-2 control-label">SAP账号</label>
+        <div class="col-sm-4">
+          <input type="text" id="sapUserCode" maxlength="20" class="form-control" v-model="formdata.sapUserCode">
+          <!-- <input type="text" id="sapUserCode" maxlength="20" class="form-control validate[custom[onlyLetterNumber]]" v-model="formdata.sapUserCode"> -->
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div id="myFooter" v-cloak>
+    <div class="form-horizontal">
+      <div class="form-group">
+        <div class="col-sm-10 col-sm-offset-2">
+          <button type="button" class="btn btn-success" @click="saveUser()">保存</button>
+          <button type="button" class="btn btn-success" @click="resetPwd()" v-show="showReset">重置密码</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

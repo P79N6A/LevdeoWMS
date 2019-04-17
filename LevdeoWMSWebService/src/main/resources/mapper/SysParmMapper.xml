@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.SysParmMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.SysParm">
+        <id column="code" property="code" />
+        <result column="name" property="name" />
+        <result column="subCode" property="subCode" />
+        <result column="subName" property="subName" />
+        <result column="bk1" property="bk1" />
+        <result column="bk2" property="bk2" />
+        <result column="bk3" property="bk3" />
+        <result column="bk4" property="bk4" />
+        <result column="bk5" property="bk5" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+        <result column="namep" property="namep" />
+        <result column="subNamep" property="subNamep" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        code, name, subCode, subName, bk1, bk2, bk3, bk4, bk5, createId, createTime, updateId, updateTime, namep, subNamep
+    </sql>
+
+    <!-- 查询停车优先策略list -->
+    <select id="getPriorityList" resultType="java.util.Map">
+		select
+		subCode,
+		subName
+		FROM sysParm
+		where code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_PARKING_POLICY}'
+	</select>
+
+    <!--通过subCode获取表名-->
+    <select id="getTableName" resultType="String" parameterType="String">
+        select bk3 from SysParm where code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_MAIN_MAINTEN}'
+            and  subCode=#{subCode}
+    </select>
+
+    <!--获取当前表的内容-->
+    <select id="getMainDataInfos" resultType="java.util.Map" parameterType="String">
+            select * from ${tbName}
+    </select>
+
+    <!--保存主数据-->
+    <insert id="saveMainData" parameterType="com.tre.jdevtemplateboot.web.pojo.MainData" >
+     insert into ${tbName} (code,
+                            name,
+                            createId,
+                            createTime,
+                            updateId,
+                            updateTime)
+                            values (
+                            #{code},
+                            #{name},
+                            #{createId},
+                            GETDATE(),
+                            #{updateId},
+                            GETDATE()
+                            )
+    </insert>
+
+    <!--查询当前表编码是否重复-->
+    <select id="selectMainDataCodeIsREPEAT" resultType="int" parameterType="String">
+        select (case WHEN  COUNT(1)>=1  THEN 1 ELSE 0 END) from  ${subCode} where code=#{code};
+    </select>
+
+    <!--查询当前表的名字是否重复-->
+    <select id="selectMainDataNameIsREPEAT" resultType="int"  parameterType="String">
+        select (case WHEN  COUNT(1)>=1  THEN 1 ELSE 0 END) from  ${subCode} where name=#{name};
+    </select>
+
+    <update id="updateMainMatById" parameterType="String">
+        update ${subCode}
+        <set>
+            name=#{name},
+            updateTime=GETDATE(),
+            updateId=#{updateId},
+        </set>
+        <where>
+            code=#{code}
+        </where>
+    </update>
+
+</mapper>

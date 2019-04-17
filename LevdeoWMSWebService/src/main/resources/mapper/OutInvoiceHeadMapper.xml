@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.OutInvoiceHeadMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.OutInvoiceHead">
+        <id column="invoiceCode" property="invoiceCode" />
+        <result column="customerCode" property="customerCode" />
+        <result column="salesOrder" property="salesOrder" />
+        <result column="type" property="type" />
+        <result column="status" property="status" />
+        <result column="shipToParty" property="shipToParty" />
+        <result column="logisticsParking" property="logisticsParking" />
+        <result column="logisticsVehicleNo" property="logisticsVehicleNo" />
+        <result column="shipType" property="shipType" />
+        <result column="giftName" property="giftName" />
+        <result column="sapInvoiceCode" property="sapInvoiceCode" />
+        <result column="matCode" property="matCode" />
+        <result column="amount" property="amount" />
+        <result column="logisCompanyCode" property="logisCompanyCode" />
+        <result column="makeOrderUser" property="makeOrderUser" />
+        <result column="makeOrderDate" property="makeOrderDate" />
+        <result column="outStockUser" property="outStockUser" />
+        <result column="outStockDate" property="outStockDate" />
+        <result column="orderTypeCode" property="orderTypeCode" />
+        <result column="subCompanyCode" property="subCompanyCode" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+        <result column="itemNo" property="itemNo" />
+        <result column="proStatus" property="proStatus" />
+        <result column="giftStatus" property="giftStatus" />
+        <result column="sendedDate" property="sendedDate" />
+        <result column="proChecker" property="proChecker" />
+        <result column="giftChecker" property="giftChecker" />
+        <result column="productStockCode" property="productStockCode" />
+        <result column="isPrint" property="isPrint" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        invoiceCode, customerCode, salesOrder, type, status, shipToParty, logisticsParking, logisticsVehicleNo, shipType, giftName, sapInvoiceCode, matCode, amount, logisCompanyCode, makeOrderUser, makeOrderDate, outStockUser, outStockDate, orderTypeCode, subCompanyCode, createId, createTime, updateId, updateTime, itemNo, proStatus, giftStatus, sendedDate, proChecker, giftChecker, productStockCode, isPrint
+    </sql>
+
+	<!-- 查询发货单 -->
+	<select id="getInvoiceList" parameterType="com.tre.jdevtemplateboot.web.pojo.OutInvoiceBean" resultType="java.util.Map">
+		SELECT DISTINCT
+		oh.sapInvoiceCode,
+		oh.matCode,
+		mainMat.name matName,
+		oh.amount,
+		CONVERT(VARCHAR(10), oh.createTime, 120) AS invoiceDate,
+		m.name customerName,
+		sysParm.subName AS outType,
+		s2.subName AS outStatus
+		FROM outInvoiceHead oh
+
+		INNER JOIN mainMat
+		ON oh.matCode = mainMat.code
+
+		INNER JOIN mainCustomers m
+		ON m.code = oh.customerCode
+
+		INNER JOIN sysParm
+		ON sysParm.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_ASN_TYPE}'
+		AND sysParm.subCode = oh.type
+
+		INNER JOIN sysParm s2
+		ON s2.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_ASN_STATUS}'
+		AND s2.subCode = oh.status
+
+		INNER JOIN sysUser su
+		ON oh.createId = su.userCode
+		AND su.warehouse = #{warehouse}
+
+		WHERE 1=1
+
+		<if test="sapInvoiceCode != null and sapInvoiceCode != ''">
+			AND upper(oh.sapInvoiceCode) LIKE
+			upper(CONCAT(CONCAT('%',#{sapInvoiceCode,jdbcType=VARCHAR}),'%'))
+		</if>
+
+		<if test="invoiceDate != null and invoiceDate != ''">
+			AND CONVERT(date,oh.createTime)=#{invoiceDate}
+		</if>
+
+		<if test="customerCode != null and customerCode != ''">
+			AND oh.customerCode=#{customerCode}
+		</if>
+
+		<if test="outType != null and outType != ''">
+			AND oh.type=#{outType}
+		</if>
+
+		<if test="outStatus != null and outStatus != ''">
+			AND oh.status=#{outStatus}
+		</if>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+	</select>
+
+	<!-- a备货Page-查询当前发货单详情 -->
+	<select id="getThisInvoiceList" resultType="java.util.Map">
+		SELECT
+		distinct oh.sapInvoiceCode,
+				m.name customerName,
+				CONVERT(VARCHAR(10), oh.createTime,120) as invoiceDate
+		FROM outInvoiceHead oh
+
+		INNER JOIN mainCustomers m
+			ON m.code=oh.customerCode
+
+		WHERE oh.sapInvoiceCode=#{thisInvoiceCode}
+	</select>
+
+	<!-- a打印备货单-根据发货单号查询 -->
+	<select id="getHeadDataByInvoiceCode"
+			parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT distinct
+		head.sapInvoiceCode,
+		head.salesOrder,
+		head.logisticsParking,
+		head.logisticsVehicleNo,
+		head.giftName,
+		salecustom.name salecustomName,
+		sendcustom.name sendcustomName,
+		sendcustom.addr sendcustomAddress,
+		CONVERT(VARCHAR(100), head.createTime, 23) AS createDate,
+		mainTransport.name transportName,
+		sysUser.userName AS makeOrderUserName,
+		users.userName AS outStockUserName,
+		mainSaleCompany.pname AS companyName,
+		head.orderTypeCode,
+		mot.name AS orderTypeName
+		FROM outInvoiceHead head
+		INNER JOIN mainCustomers salecustom
+		ON head.customerCode = salecustom.code
+
+		INNER JOIN mainCustomers sendcustom
+		ON head.shipToParty = sendcustom.code
+
+		INNER JOIN mainTransport
+		ON head.shipType=mainTransport.code
+
+		INNER JOIN sysUser
+		ON head.makeOrderUser = sysUser.sapUserCode
+
+		LEFT JOIN sysUser users
+		ON head.outStockUser = users.userCode
+
+		INNER JOIN mainSaleCompany
+		ON head.subCompanyCode = mainSaleCompany.code
+
+		INNER  JOIN  mainOrderType mOT
+		ON mOT.code = head.orderTypeCode
+
+		WHERE 1=1
+		<if test="invoiceCode!=null and invoiceCode!=''">
+			AND head.sapInvoiceCode = #{invoiceCode}
+		</if>
+
+	</select>
+
+	<!-- 冲销  -->
+	<update id="doWash" parameterType="String">
+		UPDATE outInvoiceHead
+		SET
+			status = #{P_ASN_STATUS_WAITSEND},
+			proStatus=null,
+			giftStatus=null,
+			proChecker=null,
+			giftChecker=null,
+			outStockUser=null,
+			outStockDate=null,
+			updateId = #{userCode},
+			updateTime = GETDATE()
+		WHERE sapInvoiceCode = #{sapInvoiceCode};
+
+		update od
+		set pdi=null,
+		    inspector=null,
+		    reason=null,
+			updateId = #{userCode},
+			updateTime = GETDATE()
+		from outInvoiceDetails od
+		inner join outInvoiceHead oh
+		    on oh.invoiceCode=od.invoiceCode
+		WHERE oh.sapInvoiceCode = #{sapInvoiceCode};
+
+		update s
+		set status=#{P_CAR_STATUS_SENDING},
+			updateId = #{userCode},
+			updateTime = GETDATE()
+		from stock s
+		inner join outInvoiceDetails od
+		    on s.vin=od.vin
+		inner join outInvoiceHead oh
+		    on oh.invoiceCode=od.invoiceCode
+		WHERE oh.sapInvoiceCode = #{sapInvoiceCode};
+
+		-- 99.库存日志
+		insert into stockLog (vin,matCode,operateCode,oldStorageNo,createId,createTime,updateId,updateTime)
+		select od.vin,
+		        s.matCode,
+		        #{P_STOCKLOG_WASH},
+		        od.stockPositionName,
+				createId = #{userCode},
+				createTime = GETDATE(),
+				updateId = #{userCode},
+				updateTime = GETDATE()
+		from outInvoiceDetails od
+		inner join outInvoiceHead oh
+		    on oh.invoiceCode=od.invoiceCode
+		inner join stock s
+		    on od.vin=s.vin
+		WHERE oh.sapInvoiceCode = #{sapInvoiceCode};
+	</update>
+
+	<!-- 退货冲销  -->
+	<update id="doWashForReturn" parameterType="String">
+		-- 1.更新出库单状态为待出库
+		UPDATE outInvoiceHead
+		SET
+			status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_ASN_STATUS_WAITSEND}',
+			proStatus=null,
+			giftStatus=null,
+			proChecker=null,
+			giftChecker=null,
+			outStockUser=null,
+			outStockDate=null,
+			updateId = #{userCode},
+			updateTime = GETDATE()
+		WHERE sapInvoiceCode = #{sapInvoiceCode};
+
+		-- 2.清空出库明细的pdi检测情报和库位名
+		update od
+		set pdi=null,
+		    inspector=null,
+		    reason=null,
+		    stockPositionName=null,
+			updateId = #{userCode},
+			updateTime = GETDATE()
+		from outInvoiceDetails od
+		inner join outInvoiceHead oh
+		    on oh.invoiceCode=od.invoiceCode
+		WHERE oh.sapInvoiceCode = #{sapInvoiceCode};
+
+		-- 3.释放库位
+		update sp
+ 		set InUse='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_NOT_USE}',
+ 			updateId = #{userCode},
+ 			updateTime = GETDATE()
+ 		from SysStockPosition sp
+ 		inner join stock s
+ 		    on s.stockPosition=sp.stockPosition
+ 		inner join outInvoiceDetails d
+ 		    on s.vin=d.vin
+ 		inner join outInvoiceHead h
+ 		    on h.invoiceCode=d.invoiceCode
+ 		   and sapInvoiceCode =#{sapInvoiceCode}
+
+		-- 4.更新库存状态为已出库，清空库位号
+		update s
+		set status='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_SENDED}',
+			stockPosition=null,
+			updateId = #{userCode},
+			updateTime = GETDATE()
+		from stock s
+		inner join outInvoiceDetails od
+		    on s.vin=od.vin
+		inner join outInvoiceHead oh
+		    on oh.invoiceCode=od.invoiceCode
+		WHERE oh.sapInvoiceCode = #{sapInvoiceCode};
+
+		-- 99.库存日志
+		insert into stockLog (vin,matCode,operateCode,oldStorageNo,createId,createTime,updateId,updateTime)
+		select od.vin,
+		        s.matCode,
+		        '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_STOCKLOG_WASH}',
+		        od.stockPositionName,
+				createId = #{userCode},
+				createTime = GETDATE(),
+				updateId = #{userCode},
+				updateTime = GETDATE()
+		from outInvoiceDetails od
+		inner join outInvoiceHead oh
+		    on oh.invoiceCode=od.invoiceCode
+		inner join stock s
+		    on od.vin=s.vin
+		WHERE oh.sapInvoiceCode = #{sapInvoiceCode};
+	</update>
+
+	<!--打印出库单 只允许打印一次 -->
+	<update id="printInvoice" parameterType="String">
+		update outInvoiceHead
+		set isPrint = '1'
+		where sapInvoiceCode = #{sapInvoiceCode};
+	</update>
+
+	<!--冲销后重置打印次数-->
+	<update id="cancelPrintInvoice" parameterType="String">
+		update outInvoiceHead
+		set isPrint = null
+		where sapInvoiceCode = #{sapInvoiceCode};
+	</update>
+
+</mapper>

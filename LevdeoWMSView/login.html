@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>WMS登录</title>
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+	<meta content="" name="description">
+	<meta content="" name="author">
+	<!-- ================== 开始 BASE 式样 ================== -->
+	<link rel="shortcut icon" href="favicon.ico" />
+	<link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+	<link href="assets/plugins/jquery.validationEngine/css/validationEngine.jquery.css" rel="stylesheet">
+	<link href="assets/css/ui.min.css" rel="stylesheet">
+	<!-- ================== 结束 BASE 式样 ================== -->
+	<link href="assets/plugins/toastr/css/toastr.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+	<div id="page-container">
+		<div class="login bg-black animated fadeInDown">
+			<div class="login-header">
+				<div class="brand">
+					雷丁电动汽车<span class="ui-login-logo">WMS</span>系统
+					<small>国民电动汽车引领者</small>
+				</div>
+				<div class="icon">
+					<i class="fa fa-sign-in"></i>
+				</div>
+			</div>
+			<div class="login-content">
+				<form action="" method="POST" class="margin-bottom-0" id="valiForm">
+					<div class="form-group m-b-20">
+						<input id="inUserCode" type="text" class="form-control input-lg inverse-mode no-border validate[required,maxSize[20]]"
+						 placeholder="用户名" required="">
+					</div>
+					<div class="form-group m-b-20">
+						<input id="inPassword" type="password" class="form-control input-lg inverse-mode no-border validate[required,maxSize[20]]"
+						 placeholder="密码" required="">
+					</div>
+
+					<div class="login-buttons">
+						<button type="button" class="btn btn-primary btn-block btn-lg">登录</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- BASE JS -->
+	<script src="assets/plugins/jquery/jquery.min.js"></script>
+	<script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+	<script src="assets/js/ui.min.js"></script>
+	<script src="assets/plugins/jquery.validationEngine/js/jquery.validationEngine.js"></script>
+	<script src="assets/plugins/jquery.validationEngine/js/languages/jquery.validationEngine-zh_CN.js"></script>
+	<!-- BASE JS -->
+	<script src="assets/plugins/toastr/js/toastr.min.js"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+			//表单验证初始化
+			$("#valiForm").validationEngine('attach', {
+				//只在表单提交的时候验证
+				validationEventTrigger: null,
+				//错误提示距离顶部偏移量
+				scrollOffset: 100,
+				isOverflown: true,
+				//自动隐藏-时间3000毫秒
+				// autoHidePrompt: true,
+				// autoHideDelay: 3000
+			});
+			//登录按钮-点击事件
+			$(".btn-primary").click(function () {
+				loginObj.login();
+			});
+
+			//body回车事件
+			document.onkeydown = function (event) {
+				var e = event || window.event;
+				if (e && e.keyCode == 13) { //回车键的键值为13
+					$(".btn-primary").click(); //调用登录按钮的登录事件
+				}
+			};
+		});
+
+		var loginObj = {
+
+			login: function () {
+				var inUserCode = $("#inUserCode").val();
+				var inPassword = $("#inPassword").val();
+				if (!$("#valiForm").validationEngine("validate")) {
+					return;
+				}
+				var reqParam = {
+					"userCode": inUserCode,
+					"password": inPassword
+				};
+				$.ajax({
+					type: 'POST',
+					url: '/LevdeoWMSWebService/login',
+					data: reqParam,
+					dataType: 'json',
+					success: function (resp) {
+						if (resp.code == "0") {
+							localStorage.setItem("token", resp.data);
+							location.href = "index.html";
+						} else {
+							toastr.warning(resp.msg);
+						}
+					},
+					error: function (resp) {
+						toastr.error("Error：" + resp.statusText);
+					}
+				});
+			}
+		};
+
+
+	</script>
+
+
+</body>
+
+</html>

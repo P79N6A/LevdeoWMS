@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- psql -->
+<mapper
+	namespace="com.tre.jdevtemplateboot.mapper.WarehousingMapper">
+
+
+	<!-- 获取入库一览信息 -->
+	<select id="getWarehosingList"
+		resultType="com.tre.jdevtemplateboot.web.pojo.WarehouseParameterBean"
+		parameterType="com.tre.jdevtemplateboot.domain.po.WarehousingSchedule">
+		SELECT w.wsTransition,
+			   w.vin,
+			   w.matCode,mt.name As matDescription,
+			   CONVERT (DATE,w.finishedTime)AS finishedTime,
+			   sp.name AS stockPosition,
+			   sd.subName AS state,
+			   st.subName As sapTransfer,
+			   mps.name AS productStockName,
+			   w.state AS stateCode,
+			   w.sapTransfer AS sapTransferCode
+		from warehousingSchedule w
+		left join (select subCode,subName
+						from sysParm
+						where code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_CAR_STATUS}'
+					) sd
+			on sd.subCode=w.state
+
+		left join (select subCode,subName
+						from sysParm
+						where code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_SAP_PAY}'
+					)st
+			on st.subCode=w.sapTransfer
+
+		left join mainMat mt
+			on mt.code=w.matCode
+
+		left join sysStockPosition sp
+			on sp.stockPosition=w.stockPosition
+
+		left join sysStockArea ss
+			on sp.stockAreaCode = ss.stockAreaCode
+			and ss.warehouseCode = #{warehouse}
+
+		left join mainProductStock mps
+			on w.productStockCode=mps.code
+
+		left join sysUser su
+			on su.userCode = w.createId
+
+		where su.warehouse = #{warehouse} --筛选所有createId的库区与当前系统登录id的仓库一致的
+		<if test="finishedTime!=null and finishedTime!='' ">
+			AND CONVERT(date,w.finishedTime)=#{finishedTime}
+		</if>
+
+		<if test="state!=null and state!=''">
+			AND sd.subCode=#{state}
+		</if>
+
+		<if test="sapTransfer!=null and sapTransfer!=''">
+			AND st.subCode=#{sapTransfer}
+		</if>
+
+		<if test="vin!=null and vin!=''">
+			AND w.vin like '%'+#{vin}+'%'
+		</if>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+
+	</select>
+
+	<!-- MAP获取入库一览信息 (适用调用导出excel接口) -->
+	<select id="getMapWarehosingList" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT w.wsTransition,
+			   w.vin,
+			   w.matCode,
+			   mt.name As matDescription,
+			   CONVERT (DATE,w.finishedTime)AS finishedTime,
+			   sp.name AS stockPosition,
+			   sd.subName AS state,
+			   st.subName As sapTransfer,
+			   mps.name AS productStockName,
+			   w.state AS stateCode,
+			   w.sapTransfer AS sapTransferCode
+		from warehousingSchedule w
+
+		left join (select subCode,subName
+		from sysParm
+		where code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_CAR_STATUS}'
+		) sd
+		on sd.subCode=w.state
+
+		left join (select subCode,subName
+		from sysParm
+		where code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_SAP_PAY}'
+		)st
+		on st.subCode=w.sapTransfer
+
+		left join mainMat mt
+		on mt.code=w.matCode
+
+		left join sysStockPosition sp
+		on sp.stockPosition=w.stockPosition
+
+		left join sysStockArea ss
+		on sp.stockAreaCode = ss.stockAreaCode
+		and ss.warehouseCode = #{warehouse}
+
+		left join mainProductStock mps
+		on w.productStockCode=mps.code
+
+		left join sysUser su
+		on su.userCode = w.createId
+
+		where su.warehouse = #{warehouse}
+
+		<if test="finishedTime!=null and finishedTime!='' ">
+			AND CONVERT(date,w.finishedTime)=#{finishedTime}
+		</if>
+
+		<if test="state!=null and state!=''">
+			AND sd.subCode=#{state}
+		</if>
+
+		<if test="sapTransfer!=null and sapTransfer!=''">
+			AND st.subCode=#{sapTransfer}
+		</if>
+
+		<if test="vin!=null and vin!=''">
+			AND w.vin like '%'+#{vin}+'%'
+		</if>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+
+	</select>
+
+	<!--获取入库信息通过 -->
+	<select id="getWarehousingByVin"
+		resultType="com.tre.jdevtemplateboot.web.pojo.WarehouseParameterBean"
+		parameterType="String">
+		SELECT 
+			w.vin,
+			w.matCode,
+			sp.name AS stockPosition,
+			m.name As matDescription,
+			sd.subName As sapTransfer,
+			st.subName AS state,
+			w.wsTransition,
+			mps.name AS productStockName,
+			w.state AS stateCode,
+			w.sapTransfer AS sapTransferCode
+		FROM warehousingSchedule w
+
+		LEFT JOIN mainMat m
+			ON m.code=w.matCode
+
+		LEFT JOIN sysStockPosition sp
+			ON sp.stockPosition=w.stockPosition
+
+		LEFT JOIN sysParm st
+			ON st.subCode=w.state
+			AND st.code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_CAR_STATUS}'
+
+		LEFT JOIN sysParm sd
+			ON sd.subCode=w.sapTransfer
+			AND sd.code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_SAP_PAY}'
+
+		LEFT JOIN mainProductStock mps
+			ON w.productStockCode=mps.code
+
+		LEFT JOIN sysUser sU
+		ON sU.userCode = w.createId
+
+		WHERE w.vin = #{vin} AND sU.warehouse = #{warehouse}
+	</select>
+	<!--test -->
+	<select id="getMatcodeByVin"
+		resultType="com.tre.jdevtemplateboot.web.pojo.WarehouseParameterBean"
+		parameterType="String">
+		SELECT 
+		w.wsTransition,
+		w.vin,
+		w.matCode,
+		m.name As matDescription
+		FROM warehousingSchedule w
+
+		INNER JOIN mainMat m
+		ON m.code=w.matCode
+		
+		WHERE 
+		w.vin = #{vin}
+	</select>
+	
+	
+	<!--更新 库位号 -->
+	<update id="updateStockPosition">
+		update warehousingSchedule
+		set
+			stockPosition=#{stockPosition},
+			updateId=#{updateId},
+			updateTime=#{updateTime}
+		where vin=#{vin}
+	</update>
+
+	<!--修改车库状态 操作sys车库信息表 将当前车库设置是占用状态 -->
+	<update id="updateStockPositionCMDsysSPosition">
+		update sysStockPosition
+		<set>
+			inUse='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_IN_USE}',
+			updateId=#{updateId},
+			updateTime=#{updateTime}
+		</set>
+		where stockPosition=(
+							select stockPosition
+							from warehousingSchedule
+							where vin=#{vin}
+							)
+	</update>
+
+	<!--删除入库信息 -->
+	<delete id="delWarehousingList" parameterType="String">
+		delete from warehousingSchedule
+		where vin=#{vin}
+			AND state='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_PREWAREHOUSEIN}'
+	</delete>
+	<!--删除库位信息后恢复库位号 -->
+	<update id="formatStockPosition">
+		update sysStockPosition
+		<set>
+			inUse='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_NOT_USE}',
+		</set>
+		where stockPosition=(
+							select stockPosition
+							from warehousingSchedule
+							where vin=#{vin}
+							)
+	</update>
+
+	<!--获取用户名 -->
+
+	<select id="getUsernameByUsercode" parameterType="String"
+		resultType="String">
+		select userName from sysUser where userCode=#{userCode}
+	</select>
+	<!--更改车库状态 -->
+	<update id="saveIntoWarehousing"
+		parameterType="com.tre.jdevtemplateboot.web.pojo.WarehouseParameterBean">
+		update warehousingSchedule
+		<set>
+			state='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CARWAREHOUSEIN}',
+			updateId=#{updateId},
+			updateTime=GETDATE()
+		</set>
+		where vin =#{vin}
+	</update>
+
+	<!--修改入库状态 = -->
+	<update id="batchUpdateWarehousing" parameterType="String">
+		update ws
+		set	state='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CARWAREHOUSEIN}',
+			updateId=#{operator},
+			updateTime=GETDATE()
+		from warehousingSchedule ws,
+			  inventoryWork w
+		where w.operator=#{userCode}
+		  	  and ws.vin=w.vin
+			  and ws.state='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_PREWAREHOUSEIN}'
+
+
+		insert into stockLog (<include refid="com.tre.jdevtemplateboot.mapper.StockLogMapper.Base_Column_List"></include>)
+		  select ws.vin,
+		  		ws.matCode,
+				'${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CARWAREHOUSEIN}',
+				sp.name,
+				null,
+				null,
+				#{userCode},
+				GETDATE(),
+				#{userCode},
+				GETDATE()
+		  from warehousingSchedule ws,
+			  inventoryWork w,
+			  sysStockPosition sp
+		  where w.operator=#{userCode}
+		    and ws.vin=w.vin
+		    and ws.stockPosition=sp.stockPosition
+			and ws.state='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CARWAREHOUSEIN}'
+	</update>
+
+	<!--修改入库状态 = -->
+	<update id="updateIntoWarehousing"	parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open=""
+				 close="" separator=";">
+			update warehousingSchedule
+			<set>
+				state='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CARWAREHOUSEIN}',
+				updateId=#{item.updateId},
+				updateTime=GETDATE()
+			</set>
+			where vin =#{item.vin}
+		</foreach>
+	</update>
+
+	<!--修改入库状态 sysStockPosition = -->
+	<insert id="updateIntoWarehousingCmdSysSPosition"
+		parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+			update sysStockPosition
+			<set>
+				inUse='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_IN_USE}',
+				updateId=#{item.updateId},
+				updateTime=GETDATE()
+			</set>
+			where stockPosition=(
+								select stockPosition
+								from warehousingSchedule
+								where vin=#{item.vin}
+								)
+		</foreach>
+	</insert>
+
+	<!--修改钥匙入库状态 -->
+	<update id="updateKeyIntoWarehousing" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			update warehousingSchedule
+			<set>
+				state='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}',
+				updateId=#{item.updateId},
+				updateTime=GETDATE()
+			</set>
+			where vin =#{item.vin}
+		</foreach>
+	</update>
+
+	<!--修改钥匙入库状态 stock表操作 -->
+	<insert id="updateKeyIntoWarehousingCmdStock" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+		insert into stock(
+				vin
+				,matCode
+				,stockPosition
+				,warehouseDate
+				,status
+-- 				,lock
+				,batteryType
+				,lastChargeDate
+				,productStockCode
+				,createid
+				,createtime
+				,updateid
+				,updatetime)
+		select w.vin
+				,w.matCode
+				,w.stockPosition
+				,GETDATE()
+				,w.state
+-- 				,'${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_LOCK_OFF}'
+				,#{item.batteryType}
+				,GETDATE()
+				,productStockCode
+				,w.updateId
+				,GETDATE()
+				,w.updateId
+				,GETDATE()
+		from warehousingSchedule w
+		where w.vin in (
+				#{item.vin}
+			)
+			</foreach>
+	</insert>
+
+	<!--修改非下线入库状态 -->
+	<update id="updateOnlineIntoWarehousing"
+		parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+
+			update stock
+			<set>
+				status='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}',
+				updateid=#{item.updateId},
+				updatetime=GETDATE()
+			</set>
+			where UPPER(vin) = UPPER (#{item.vin})
+		</foreach>
+	</update>
+
+	<!--修改非下线入库状放状态 -->
+	<update id="updateOnlineIntoWarehousingCmdsysSPosition"
+		parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+
+			update sysStockPosition
+			<set>
+				inUse ='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_NOT_USE}',
+				updateId = #{item.updateId},
+				updateTime = GETDATE()
+			</set>
+			where stockPosition = (
+									select stockPosition
+									from warehousingSchedule
+									where vin = #{item.vin}
+								  )
+		</foreach>
+
+	</update>
+
+	<!--查询车位是否被占用 -->
+	<select id="getPositionIsUsed"
+		resultType="com.tre.jdevtemplateboot.domain.po.SysStockPosition">
+		select * from sysStockPosition
+		where stockPosition=#{stockPosition}
+			AND inUse='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_NOT_USE}'
+	</select>
+
+
+	<!--通过VIN库存信息 -->
+	<select id="getStockInfoByVin"
+		resultType="com.tre.jdevtemplateboot.domain.po.Stock"
+		parameterType="String">
+		select * from stock where UPPER(vin) = UPPER (#{vin})
+	</select>
+
+
+	<!--只需要 待入库 车辆入库 在库三种状态 （入库一览可用） -->
+	<select id="getWarehousingStateByCode"
+		resultType="com.tre.jdevtemplateboot.domain.po.SysParm">
+		select * from sysParm
+		where subCode IN(
+						'${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_PREWAREHOUSEIN}'
+						,'${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CARWAREHOUSEIN}'
+						,'${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}'
+						)
+			  AND code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_CAR_STATUS}';
+	</select>
+
+
+	<!--通过VIN码释放库位 -->
+	<update id="releaseStockByVin">
+		update sysStockPosition
+		<set>
+			inUse='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_NOT_USE}'
+		</set>
+		where stockPosition=(
+							select stockPosition
+							from warehousingSchedule
+							where vin=#{vin}
+							)
+	</update>
+
+
+	<!-- 保存 -->
+	<insert id="saveWarehousingInfo"
+		parameterType="com.tre.jdevtemplateboot.domain.po.StockLog">
+		INSERT INTO stockLog(
+							vin,
+							matCode,
+							operateCode,
+							oldStorageNo,
+							newStorageNo
+							createId,
+							createTime,
+							updateId,
+							updateTime
+							)VALUES (
+							#{vin},
+							#{matCode},
+							#{operateCode},
+							#{oldStorageNo},
+							#{newStorageNo}
+							#{createId},
+							GETDATE(),
+							#{updateId},
+							GETDATE())
+
+	</insert>
+
+
+	<!--非下线入库状态 -->
+	<select id="getStockInfoByVinOnline"
+		resultType="com.tre.jdevtemplateboot.web.pojo.WarehouseParameterBean">
+		select s.vin,s.matCode,m.name As matDescription,mps.name AS productStockName 
+		from stock s
+		
+		inner join mainMat m
+		on m.code=s.matCode
+		
+		inner join mainProductStock mps
+		on s.productStockCode=mps.code
+
+		inner join sysUser sU
+		on sU.userCode = s.createId
+		
+		where UPPER(vin)=UPPER(#{vin}) and sU.warehouse = #{warehouse}
+	</select>
+
+	<!--非下线入库修改成功返回页面的VIN码及详细信息-->
+	<select id="queryOnlineUpdatingInfo" resultType="com.tre.jdevtemplateboot.web.pojo.WarehouseParameterBean" parameterType="java.util.List">
+		select s.vin,
+			   s.matCode,
+			   sp.name AS stockPosition,
+			   m.name As matDescription,
+			   mps.name AS productStockName
+		from stock s
+		inner join mainMat m
+			on m.code=s.matCode
+
+		inner join sysStockPosition sp
+			on sp.stockPosition=s.stockPosition
+
+		inner join mainProductStock mps
+			on s.productStockCode=mps.code
+
+		where vin in (
+		<foreach collection="list" item="item" index="index" open=""
+				 close="" separator=",">
+			#{item.vin}
+		</foreach>
+		)
+	</select>
+	<select id="getMatCodeByVin" resultType="com.tre.jdevtemplateboot.web.pojo.StockView" parameterType="String">
+		select s.*,m.name As matDescription
+		from stock s
+
+		inner join mainMat m
+		on s.matCode=m.code
+
+		where s.vin=#{vin}
+	</select>
+	<select id="getMatCodeByVinFromWs" resultType="com.tre.jdevtemplateboot.web.pojo.StockView" parameterType="String">
+		select s.*,m.name As matDescription
+		from warehousingSchedule s
+
+		inner join mainMat m
+			on s.matCode=m.code
+
+		where s.vin=#{vin}
+	</select>
+    <select id="queryStockInfoByVin" resultType="com.tre.jdevtemplateboot.web.pojo.StockView" parameterType="java.util.List">
+        select st.*,sp.name AS stockPositionName
+        from stock st
+
+        inner join sysStockPosition sp
+        	on st.stockPosition=sp.stockPosition
+
+        where st.vin in(
+        <foreach collection="list" item="item" index="index" open=""
+                 close="" separator=",">
+            #{item}
+        </foreach>
+        )
+    </select>
+
+	<!--查询无法批量更新的vin码 -->
+	<select id="checkPdaResult" parameterType="String" resultType="String">
+		WITH #vins AS (
+            SELECT
+              distinct w.vin
+            FROM
+              inventoryWork w
+
+            left join warehousingSchedule s
+                    on w.vin = s.vin
+
+            left join sysUser u
+			        on s.updateId = u.userCode
+			       and u.warehouse = #{warehouseCode}
+
+            WHERE w.operator = #{userCode}
+              and (s.vin is null or s.state != '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_PREWAREHOUSEIN}')
+		)
+		SELECT stuff (( SELECT ',' + vin FROM #vins FOR XML path ( '' ) ), 1, 1, '') vins
+	</select>
+
+	<select id="queryAllWsInfoByVin" resultType="com.tre.jdevtemplateboot.web.pojo.WarehouseParameterBean" parameterType="java.util.List">
+		select w.*,m.name AS matDescription
+		from warehousingSchedule w
+
+		inner join mainMat m
+			on w.matCode=m.code
+
+		where vin in (
+		<foreach collection="list" item="item" index="index" open=""
+				 close="" separator=",">
+			#{item.vin}
+		</foreach>
+		)
+	</select>
+</mapper>

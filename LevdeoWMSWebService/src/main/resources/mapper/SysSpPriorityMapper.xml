@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.tre.jdevtemplateboot.mapper.SysSpPriorityMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap"
+		type="com.tre.jdevtemplateboot.domain.po.SysSpPriority">
+		<id column="stockPosition" property="stockPosition" />
+		<result column="priorityCode" property="priorityCode" />
+		<result column="prioritySubCode" property="prioritySubCode" />
+		<result column="createId" property="createId" />
+		<result column="createTime" property="createTime" />
+		<result column="updateId" property="updateId" />
+		<result column="updateTime" property="updateTime" />
+		<result column="priorityId" property="priorityId" />
+	</resultMap>
+	<!-- 通用查询结果列 -->
+	<sql id="Base_Column_List">
+		stockPosition, priorityCode,
+		prioritySubCode, createId,
+		createTime, updateId,
+		updateTime, priorityId
+	</sql>
+
+	<!-- a根据库位号删除 -->
+	<delete id="deleteBycode" parameterType="String">
+		DELETE spp
+		FROM sysSpPriority spp
+
+		INNER JOIN sysStockPosition sp 
+			ON spp.stockPosition=sp.stockPosition
+			AND sp.stockAreaCode = #{code}
+	</delete>
+	
+	<!--a批量插入库位优先策略 -->
+	<insert id="insertSpPriority">
+		<if test="radioChoose == 'radioYes' ">
+			SELECT p.stockPosition
+			INTO #tempSp
+			FROM sysStockPosition p
+			WHERE p.stockPosition != #{stockPosition}
+					AND p.stockPosition between #{startSp} and #{endSp}
+					AND p.isLock = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_LOCK_OFF}';
+
+			DELETE FROM sysSpPriority
+			WHERE stockPosition
+				  IN (
+				  SELECT stockPosition FROM #tempSp
+				  );
+
+			DELETE FROM sysSpPriorityData
+			WHERE stockPosition
+				  IN (
+				  SELECT stockPosition FROM #tempSp
+				  );
+		</if>
+		<if test="radioChoose == 'radioNo' ">
+			SELECT p.stockPosition
+			INTO #spSp
+			FROM sysStockPosition p
+
+			WHERE 	p.stockPosition != #{stockPosition}
+					AND p.stockPosition between #{startSp} and #{endSp}
+					AND p.isLock = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_LOCK_OFF}';
+
+			SELECT spp.stockPosition
+			INTO #sppSp
+			FROM sysSpPriority spp
+			WHERE spp.stockPosition 
+				IN (
+					SELECT stockPosition FROM #spSp
+				)
+
+			SELECT #spSp.stockPosition
+			INTO #tempSp
+			FROM #spSp 
+			WHERE #spSp.stockPosition 
+				NOT IN (
+					SELECT stockPosition FROM #sppSp
+				)
+		</if>
+
+		INSERT INTO sysSpPriority
+					  (stockPosition,
+					  priorityCode,
+					  priorityId,
+					  prioritySubCode,
+					  createId,
+					  createTime,
+					  updateId,
+					  updateTime
+					  )
+		SELECT
+				tsp.stockPosition,
+				p.priorityCode,
+				p.priorityId,
+				p.prioritySubCode,
+				#{userCode},
+				getdate(),
+				#{userCode},
+				getdate()
+		FROM sysSpPriority p
+
+		CROSS JOIN #tempSp tsp
+		WHERE p.stockPosition = #{stockPosition};
+
+		INSERT INTO sysSpPriorityData
+						(stockPosition,
+						priorityId,
+						priorityRule,
+						createId,
+						createTime,
+						updateId,
+						updateTime
+						)
+		SELECT
+				tsp.stockPosition,
+				pd.priorityId,
+				pd.priorityRule,
+				#{userCode},
+				getdate(),
+				#{userCode},
+				getdate()
+		FROM sysSpPriorityData pd
+
+		CROSS JOIN #tempSp tsp
+		WHERE pd.stockPosition = #{stockPosition};
+
+	</insert>
+
+	<!-- a 查询库位指定优先级详情 -->
+	<!-- a 颜色 -->
+	<select id="getSPLVColor" resultType="java.util.Map">
+		SELECT
+			ssp.stockPosition,ssp.priorityCode,ssp.priorityId,mainColor.code,mainColor.name
+		FROM sysSpPriority ssp
+
+		INNER JOIN mainColor
+			ON ssp.prioritySubCode = mainColor.code
+
+		WHERE
+			ssp.stockPosition=#{stockPosition}
+			AND ssp.priorityCode=#{priorityCode}
+
+		order by ssp.priorityId
+	</select>
+	<!-- a 品牌 -->
+	<select id="getSPLVBrand" resultType="java.util.Map">
+		SELECT
+			ssp.stockPosition,ssp.priorityCode,ssp.priorityId,mainBrand.code,mainBrand.name
+		FROM sysSpPriority ssp
+
+		INNER JOIN mainBrand
+			ON ssp.prioritySubCode = mainBrand.code
+
+		WHERE
+			ssp.stockPosition=#{stockPosition}
+		 	AND ssp.priorityCode=#{priorityCode}
+
+		order by ssp.priorityId
+	</select>
+	<!-- a 系列 -->
+	<select id="getSPLVSeries" resultType="java.util.Map">
+		SELECT
+			ssp.stockPosition,ssp.priorityCode,ssp.priorityId,mainSeries.code,mainSeries.name
+		FROM sysSpPriority ssp
+
+		INNER JOIN mainSeries
+			ON ssp.prioritySubCode = mainSeries.code
+
+		WHERE
+			ssp.stockPosition=#{stockPosition}
+			AND ssp.priorityCode=#{priorityCode}
+
+		order by ssp.priorityId
+	</select>
+
+
+
+
+</mapper>

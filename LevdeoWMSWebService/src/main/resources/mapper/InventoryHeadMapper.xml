@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.InventoryHeadMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.InventoryHead">
+        <id column="planId" property="planId" />
+        <result column="planDate" property="planDate" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        planId, planDate, createId, createTime, updateId, updateTime, status
+    </sql>
+
+	<!-- 盘点计划-查询盘点计划列表 -->
+	<select id="getPlanList" parameterType="com.tre.jdevtemplateboot.web.pojo.InventoryParameterBean" resultType="hashmap">
+		with chkCnt as (
+			select planid
+					,sum(plannum) plannumTotal
+					,sum(carResult) carResultTotal
+			from inventoryDetails d
+			group by planid
+						)
+		select 
+			i.planId, 
+			format(i.planDate,'yyyy-MM-dd') planDate, 
+			i.status statusId, 
+			s.subName status,
+			s.bk3,
+			chkCnt.plannumTotal,
+			chkCnt.carResultTotal
+		from 
+			inventoryHead i
+
+		inner join sysParm s 
+			on s.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_CHECK_STATUS}'
+			and i.status = s.subCode
+
+		inner join sysUser su 
+			on i.createId = su.userCode
+			and su.warehouse = #{warehouse}
+
+		inner join chkCnt
+			on i.planid=chkCnt.planid
+		where 1=1
+		<if test="planDate != null and planDate !=''" >
+			AND i.planDate = #{planDate}
+		</if>
+
+		<if test="status != null and status !=''" >
+			AND i.status = #{status}
+		</if>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+
+	</select>
+	
+	<!-- 新建盘点计划-查询在库车辆列表 -->
+	<select id="getAllCarList" resultType="hashmap">
+		select 
+			s.vin,
+			s.matCode,
+			m.name materielName,
+			sp.name stockPosition,
+			p.subName status
+		from 
+			stock s
+		inner join mainMat m
+			on s.matCode = m.code
+
+		inner join sysParm p
+			on p.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_CAR_STATUS}'
+			and p.subCode = s.status
+
+		inner join sysStockPosition sp
+			on s.stockPosition = sp.stockPosition
+
+		inner join sysStockArea ss
+			on sp.stockAreaCode = ss.stockAreaCode
+			and ss.warehouseCode = #{warehouse}
+		where 
+			(
+				s.status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}'
+				OR s.status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_WAITSEND}'
+				OR s.status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CHARGE}'
+				OR s.status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_FIX}'
+			)
+			
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+
+	</select>
+	
+	<!-- 新建盘点计划-保存计划主表 -->
+	<insert id="saveInventory">
+		INSERT INTO inventoryHead (
+			<include refid="Base_Column_List"></include>
+		) VALUES (
+			#{planId},
+			#{planDate},
+			#{loginId},
+			#{currentTime},
+			#{loginId},
+			#{currentTime},
+			#{status}
+		);
+	</insert>
+	
+	<!-- 查询全部人员列表 -->
+	<select id="getAllUserList" resultType="hashmap">
+		select 
+			userCode,userName 
+		from 
+			sysUser 
+		where 
+			isDel = 0 
+			and warehouse = #{_parameter}
+	</select>
+	
+</mapper>

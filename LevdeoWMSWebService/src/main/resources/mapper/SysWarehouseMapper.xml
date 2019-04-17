@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.SysWarehouseMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.SysWarehouse">
+        <id column="warehouseCode" property="warehouseCode" />
+        <result column="name" property="name" />
+        <result column="address" property="address" />
+        <result column="contact" property="contact" />
+        <result column="phoneNo" property="phoneNo" />
+        <result column="remark" property="remark" />
+        <result column="priorityLV1" property="priorityLV1" />
+        <result column="priorityLV2" property="priorityLV2" />
+        <result column="priorityLV3" property="priorityLV3" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        warehouseCode, name, address, contact, phoneNo, remark, priorityLV1, priorityLV2, priorityLV3, createId, createTime, updateId, updateTime
+    </sql>
+    
+	<!-- 查询仓库一览信息 -->
+	<select id="searchAll"
+		parameterType="com.tre.jdevtemplateboot.web.pojo.ChargParameterBean"
+		resultType="java.util.Map">
+		SELECT
+			s.warehouseCode,
+			s.name,
+			s.address,
+			s.contact,
+			s.phoneNo,
+			p1.subname priorityLv1Name,
+			p2.subname priorityLv2Name,
+			p3.subname priorityLv3Name
+		FROM sysWarehouse s
+
+		inner join sysParm p1
+			on s.priorityLV1=p1.subcode
+			and p1.code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_PARKING_POLICY}'
+
+		inner join sysParm p2
+			on s.priorityLV2=p2.subcode
+			and p2.code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_PARKING_POLICY}'
+
+		inner join sysParm p3
+			on s.priorityLV3=p3.subcode
+			and p3.code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_PARKING_POLICY}'
+		where 1=1
+
+		<if test="wareHouse!=null and wareHouse!=''">
+			AND s.warehouseCode = #{wareHouse}
+		</if>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+	</select>   
+	
+	<!-- 查询单个仓库信息 -->
+	<select id="info" parameterType="String" resultType="com.tre.jdevtemplateboot.domain.po.SysWarehouse">
+		SELECT * FROM sysWarehouse
+		where warehouseCode = #{code,jdbcType=VARCHAR}
+	</select>	 
+	
+	<!-- 更新单个仓库信息 -->
+	<update id="update" parameterType="com.tre.jdevtemplateboot.domain.po.SysWarehouse">
+		update sysWarehouse
+		set
+	       [name] = #{name}
+	      ,[address] = #{address}
+	      ,[contact] = #{contact}
+	      ,[phoneNo] = #{phoneNo}
+	      ,[remark] = #{remark}
+	      ,[priorityLV1] = #{priorityLV1}
+	      ,[priorityLV2] = #{priorityLV2}
+	      ,[priorityLV3] = #{priorityLV3}
+	      ,[updateId]	= #{updateId}	
+	      ,[updateTime]	= GETDATE()	
+		where 1=1
+		<if test="warehouseCode!=null and warehouseCode!=''">
+			AND warehouseCode = #{warehouseCode}
+		</if>
+	</update>	 
+	
+	<!-- 查询最大的仓库code -->
+	<select id="selectMaxCode" resultType="STRING">
+		select max(warehouseCode) FROM sysWarehouse
+	</select>	
+	
+	<!-- 新建保存仓库信息 -->
+	<insert id="saveHouse" parameterType="com.tre.jdevtemplateboot.domain.po.SysWarehouse">
+		insert into sysWarehouse
+								values(
+										#{warehouseCode},
+										#{name},
+										#{address},
+										#{contact},
+										#{phoneNo},
+										#{remark},
+										#{priorityLV1},
+										#{priorityLV2},
+										#{priorityLV3},
+										#{createId},
+										GETDATE(),
+										#{updateId},
+										GETDATE()
+								)
+	</insert>	 
+	
+	<!-- 查询仓库是否划分库区 -->
+	<select id="selectCount" parameterType="String" resultType="Integer">
+		select count(*) FROM sysStockArea
+		where warehouseCode = #{code}
+	</select>	
+	
+	<!-- 删除单个仓库信息 -->
+	<delete id="delete" parameterType="String">
+		delete from sysWarehouse where warehouseCode = #{code}
+	</delete>
+	
+	<!-- 查询仓库list -->
+	<select id="getWareHouseList" resultType="java.util.Map">
+		select 
+			warehouseCode,
+			name
+		FROM sysWarehouse
+	</select>		
+
+</mapper>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.InventoryDetailsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.InventoryDetails">
+        <id column="planId" property="planId" />
+        <result column="vin" property="vin" />
+        <result column="planNum" property="planNum" />
+        <result column="carResult" property="carResult" />
+        <result column="keyResult" property="keyResult" />
+        <result column="outPlan" property="outPlan" />
+        <result column="checkPerson" property="checkPerson" />
+        <result column="checkTime" property="checkTime" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        planId, vin, planNum, carResult, keyResult, outPlan, checkPerson, checkTime, createId, createTime, updateId, updateTime
+    </sql>
+
+
+    <!-- 计划详情-查询盘点详情列表 -->
+	<select id="getPlanDetailsList" resultType="hashmap">
+		SELECT 
+			i.vin,
+			case when i.outPlan='1' then '' ELSE s.matCode END matCode,
+			case when i.outPlan='1' then '' ELSE m.name END materielName,
+			case when i.outPlan='1' then '' ELSE sp.name END stockPosition,
+			i.planNum,
+			i.carResult,
+			i.keyResult,
+			i.outPlan,
+			i.checkPerson,
+			u.userName checkPersonName,
+			i.createId,
+			i.createTime
+		FROM 
+			inventoryDetails i
+		left join stock s
+			on i.vin = s.vin
+
+		left join mainMat m
+			on s.matCode =m.code
+
+		left join sysUser u
+			on u.userCode = i.checkPerson
+
+		left join sysStockPosition sp
+			on s.stockPosition = sp.stockPosition
+		WHERE
+			i.planId = #{planId}
+		order by 
+			i.outplan, i.vin
+	</select>
+
+
+    <!-- 新建盘点计划-保存计划详情表 -->
+	<insert id="saveInventoryDetails">
+		INSERT INTO inventoryDetails(
+			<include refid="Base_Column_List"></include>
+		) SELECT
+			#{planId} planId,
+			a.vin,
+			'1' planNum,
+			NULL carResult,
+			NULL keyResult,
+			'0' outPlan,
+			NULL checkPerson,
+			NULL checkTime,
+			#{loginId} createId,
+			#{currentTime} createTime,
+			#{loginId} updateId,
+			#{currentTime} updateTime
+		FROM
+			stock a
+
+		inner join sysStockPosition b 
+			on a.stockPosition=b.stockPosition
+
+		inner join sysStockArea c 
+			on b.stockAreaCode = c.stockAreaCode
+			and c.warehouseCode = #{warehouseCode}
+		WHERE
+			status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}'
+			OR status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_SENDING}'
+			OR status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CHARGE}'
+			OR status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_FIX}';
+	</insert>
+
+
+	<!-- 清空临时表，防止产生干扰 -->
+	<delete id="deleteinventoryWork">
+		DELETE FROM inventoryWork WHERE planId = #{_parameter}
+	</delete>
+
+
+	<!-- 核对PAD数据 -->
+	<select id="checkPDA" resultType="string">
+		select 
+			distinct i.checkPerson
+		from 
+			inventoryWork i
+
+		left join sysUser u
+			on i.checkPerson = u.userCode
+			and u.warehouse = #{warehouseCode}
+
+		where 
+			i.operator = #{operator}
+			and i.checkPerson is not null
+			and u.userCode is null
+	</select>
+
+
+	<!-- 批量更新/插入公用SQL -->
+	<sql id="bachSQL">
+		from inventoryDetails
+
+		right join 
+		(
+			SELECT vin,sum(inventoryWork.carResult) carResult
+			from inventoryWork
+			where operator = #{operator}
+			group by vin
+		) a 
+			on inventoryDetails.vin = a.vin
+			and inventoryDetails.planId = #{planId}
+
+		left join (
+			SELECT 
+				row_number() over (PARTITION by vin ORDER BY checkTime desc) rowNum,
+				vin,carResult,checkPerson,checkTime
+			from inventoryWork
+			where operator = #{operator}
+		) b
+			on a.vin = b.vin
+		where b.rowNum = '1'
+			and inventoryDetails.vin
+	</sql>
+
+
+	<!-- 批量更新盘点详情 -->
+	<update id="bachUpdateDetails">
+		update inventoryDetails set
+			carResult = a.carResult,
+			checkPerson = b.checkPerson,
+			checkTime = isNull(b.checkTime,GETDATE()),
+			updateId = #{operator},
+			updateTime = GETDATE()
+		<include refid="bachSQL"></include>
+		is not null;
+		
+		insert into inventoryDetails (
+			<include refid="Base_Column_List"></include>
+		) SELECT
+			#{planId} planId,
+			a.vin,
+			NULL planNum,
+			a.carResult,
+			NULL keyResult,
+			'1' outPlan,
+			b.checkPerson checkPerson,
+			b.checkTime checkTime,
+			#{operator} createId,
+			GETDATE() createTime,
+			#{operator} updateId,
+			GETDATE() updateTime
+		<include refid="bachSQL"></include>
+		is null;
+	</update>
+
+
+	<!-- 获取错误信息 -->
+	<select id="getMsg" resultType="string">
+		select name from sysMessage where code = #{_parameter}
+	</select>
+
+
+	<!-- 删除计划外车辆 -->
+	<delete id="deleteByVin">
+		delete from inventoryDetails
+		where planId = #{planId}
+		and vin = #{vin}
+	</delete>
+
+</mapper>

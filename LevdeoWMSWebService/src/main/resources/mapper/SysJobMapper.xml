@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.SysJobMapper">
+    <!-- 插入jobLog -->
+    <insert id="insertSysJobLog">
+        INSERT INTO sysJobLog(
+                              jobName,
+                              runtime,
+                              result,
+                              successCnt,
+                              failCnt,
+                              success,
+                              fail,
+                              exception,
+                              createId,
+                              createTime,
+                              updateId,
+                              updateTime
+                            ) VALUES (
+                                      #{jobName},
+                                      #{runtime},
+                                      #{result},
+                                      #{successCnt},
+                                      #{failCnt},
+                                      #{success},
+                                      #{fail},
+                                      #{exception},
+                                      #{userCode},
+                                      GETDATE(),
+                                      #{userCode},
+                                      GETDATE()
+                                    );
+    </insert>
+
+    <!--&lt;!&ndash; outInvoiceHead 中查找所有 00:待分配 的发货单 &ndash;&gt;-->
+    <!--<select id="searchAssignedInvoice" resultType="java.util.Map">-->
+        <!--SELECT head.*,-->
+               <!--sysUser.warehouse-->
+        <!--FROM outInvoiceHead head-->
+
+        <!--INNER JOIN sysUser-->
+            <!--ON head.createId = sysUser.userCode-->
+
+        <!--WHERE head.status='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_ASN_STATUS_WAITVIN}'-->
+            <!--ORDER BY head.createTime;-->
+	<!--</select>-->
+
+    <!-- 库存表中按时间从早到晚，取得待分配(03:在库、05:充电)车辆 -->
+    <select id="searchAssignedStocks" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT top ${amount} stock.*
+        FROM stock
+
+        INNER JOIN sysStockPosition pos
+        ON stock.stockPosition = pos.stockPosition
+
+        INNER JOIN sysStockArea area
+        ON pos.stockAreaCode = area.stockAreaCode
+
+        INNER JOIN sysWarehouse house
+        ON area.warehouseCode = house.warehouseCode
+        AND house.warehouseCode = #{warehouse}
+
+        WHERE   stock.status IN ('${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}',
+                                 '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CHARGE}'
+                                )
+--                 AND stock.lock = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_LOCK_OFF}'
+                AND stock.matCode = #{matCode}
+        ORDER BY stock.createTime;
+	</select>
+
+    <!-- 库存表中，根据物料编码matCode，取得待分配(03:在库、05:充电)、02:未锁定 的车辆数量 -->
+    <select id="searchAssignedStocksCnt" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(1) cnt
+        FROM stock
+        INNER JOIN sysStockPosition pos
+          ON stock.stockPosition = pos.stockPosition
+
+        INNER JOIN sysStockArea area
+          ON pos.stockAreaCode = area.stockAreaCode
+
+        INNER JOIN sysWarehouse house
+          ON area.warehouseCode = house.warehouseCode
+          AND house.warehouseCode = #{warehouse}
+
+       WHERE stock.status IN ('${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}',
+                              '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CHARGE}'
+                             )
+--             AND stock.lock = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_LOCK_OFF}'
+            AND stock.matCode = #{matCode};
+	</select>
+
+    <!-- 库存表中，根据物料编码matCode，按时间从早到晚，取得待分配(03:在库、05:充电)、02:未锁定 车辆，插入到发货单详情表outInvoiceDetails -->
+    <insert id="insertAssignedStocks" parameterType="java.util.Map">
+        INSERT INTO outInvoiceDetails(
+                                     invoiceCode,
+                                     vin,
+                                     createId,
+                                     createTime,
+                                     updateId,
+                                     updateTime
+                                     )
+        SELECT top ${amount} #{invoiceCode},
+               stock.vin,
+               #{sysUserCode},
+               GETDATE(),
+               #{sysUserCode},
+               GETDATE()
+        FROM stock
+        INNER JOIN sysStockPosition pos
+          ON stock.stockPosition = pos.stockPosition
+
+        INNER JOIN sysStockArea area
+          ON pos.stockAreaCode = area.stockAreaCode
+
+        INNER JOIN sysWarehouse house
+          ON area.warehouseCode = house.warehouseCode
+          AND house.warehouseCode = #{warehouse}
+
+        WHERE stock.status IN ('${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}',
+                               '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CHARGE}')
+--             AND stock.lock = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_LOCK_OFF}'
+            AND stock.matCode = #{matCode}
+        ORDER BY stock.warehouseDate;
+    </insert>
+
+    <!-- 更新 outInvoiceHead 发货单状态为01：待发货 -->
+    <update id="updateAssignedInvoice" parameterType="java.util.Map">
+        UPDATE outInvoiceHead
+        SET
+          status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_ASN_STATUS_WAITSEND}'
+        WHERE invoiceCode = #{invoiceCode};
+	</update>
+
+    <!-- 更新 stock 库存表中取得的待分配车辆状态 03：待分配->04：待发货 -->
+    <update id="updateAssignedStocks" parameterType="java.util.Map">
+        WITH stocks AS(
+          SELECT top ${amount} stock.*
+          FROM stock
+
+          INNER JOIN sysStockPosition pos
+               ON stock.stockPosition = pos.stockPosition
+
+          INNER JOIN sysStockArea area
+               ON pos.stockAreaCode = area.stockAreaCode
+
+          INNER JOIN sysWarehouse house
+               ON area.warehouseCode = house.warehouseCode
+               AND house.warehouseCode = #{warehouse}
+
+          WHERE stock.status IN ('${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_INSTORAGE}',
+                                 '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_CHARGE}')
+--               AND stock.lock = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_LOCK_OFF}'
+              AND stock.matCode = #{matCode}
+          ORDER BY stock.createTime
+        )
+        UPDATE stocks
+        SET
+          status = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_SENDING}';
+	</update>
+</mapper>

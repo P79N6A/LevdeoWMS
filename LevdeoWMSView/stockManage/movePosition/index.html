@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>车辆移库</title>
+
+    <!-- 共通css -->
+    <script src="../../common/commoncss.js"></script>
+</head>
+
+<body>
+    <ol class="breadcrumb pull-right">
+        <li><a href="javascript:;">库存管理</a>
+        </li>
+        <li><a href="javascript:;">车辆移库</a>
+        </li>
+    </ol>
+    <h2 class="page-header">车辆移库</h2>
+    <hr />
+
+    <div id="myHeader" class="row">
+        <div class="form-horizontal">
+            <div class="form-group col-sm-4">
+                <label class="col-sm-3 control-label">库区</label>
+                <div class="col-sm-9">
+                    <select id="selStockArea" data-live-search="false" class="form-control" data-type="STOCK_AREA_LIST_WITH_WAREHOUSE">
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-sm-4">
+                <label class="col-sm-3 control-label">VIN码</label>
+                <div class="col-sm-9">
+                    <textarea id="taVin" class="form-control justEnglish" style="resize: none;width: 210px; height: 45px;"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group col-sm-4">
+                <div class="row pull-right">
+
+                    <button type="button" id="btnSearch" class="btn btn-primary">查询</button>
+                    <button type="button" id="btnExport" class="btn btn-primary">导出</button>
+                    <!-- 导出form表单 -->
+                    <form class="form-horizontal" id="search_form" enctype="multipart/form-data" style="display:none">
+                        <input type="hidden" name="orderColumn" value="s.vin">
+                        <input type="hidden" name="orderDir" value="asc">
+                        <input type="hidden" name="stockArea">
+                        <input type="hidden" name="vin">
+                    </form>
+
+                    <button type="button" id="btnImport" class="btn btn-success">导入</button>
+                    <!-- 导入form表单 -->
+                    <form id="uploadForm" style="display:none">
+                        <input id="fileToUpload" name="file" type="file" class="input" accept=".xls,.xlsx">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="myContent" class="row">
+        <div class="col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="tableDiv">
+                    <table id="tableBox" class="table table-bordered table-datas" style="min-width:100%">
+                    </table>
+                </div>
+                <div class="panel-body" id="tableDiv2" style="display:none;">
+                    <table id="tableBox2" class="table table-bordered table-datas" style="min-width:100%">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- 共通js -->
+    <script src="../../common/commonjs.js"></script>
+    <script src="js/argoxPrint.js"></script>
+    <script src="js/controller.js"></script>
+</body>
+
+</html>

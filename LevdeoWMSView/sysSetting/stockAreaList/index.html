@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>库区管理</title>
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+	<meta content="" name="description">
+	<meta content="" name="author">
+
+	<!-- 共通css -->
+	<script src="../../common/commoncss.js"></script>
+</head>
+
+<body>
+	<div id="rrapp" v-cloak>
+		<ol class="breadcrumb pull-right">
+			<li><a href="javascript:;">系统设置</a>
+			</li>
+			<li><a href="javascript:;">库区管理</a>
+			</li>
+		</ol>
+		<h2 class="page-header">库区管理</h2>
+		<hr />
+
+		<div v-show="showList">
+			<div id="myHeader" class="row">
+				<form class="form-horizontal">
+					<div class="form-group col-sm-4">
+						<label class="control-label col-sm-3">仓库</label>
+						<div class="col-sm-9">
+							<select id="selectWarehouse" data-live-search="false" class="form-control" data-type="WAREHOUSE_LIST">
+							</select>
+						</div>
+					</div>
+					<div class="form-group col-sm-4">
+						<label class="control-label col-sm-3">库区名</label>
+						<div class="col-sm-9">
+							<input id="areaName" type="text" class="form-control limitSpecialChar">
+						</div>
+					</div>
+					<div class="form-group col-sm-4">
+						<div class="row pull-right">
+							<button type="button" id="btnSearch" class="btn btn-primary">查询</button>
+							<button type="button" class="btn btn-success" @click="add">新建</button>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div id="myContent" class="row">
+				<div class="col-xs-12">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<table id="tableBox" class="table table-bordered table-datas" style="min-width:100%"></table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div v-show="!showList">
+			<div id="myDetail">
+				<form class="form-horizontal">
+					<div class="form-group">
+						<label class="control-label col-sm-2">库区编号</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" v-model="area.stockAreaCode" disabled>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2 myRequired">库区类型</label>
+						<div class="col-sm-4">
+							<input type="radio" class="radioBtn" v-model="area.flag" name="areType" value="1" id="fixed">
+							<label for="fixed" class="control-label">固定库区</label>
+							<input type="radio" class="radioBtn" v-model="area.flag" name="areType" value="0" id="changed" style="margin-left:30px">
+							<label for="changed" class="control-label">临时库区</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2 myRequired">所属仓库</label>
+						<div class="col-sm-4">
+							<select id="wareHouse" data-live-search="false" class="form-control validate[required]" data-type="WAREHOUSE_LIST">
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2 myRequired">库区名</label>
+						<div class="col-sm-4">
+							<input id="iptStockArea" type="text" maxlength="20" class="form-control validate[required]" v-model.lazy="area.name" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2 myRequired">停放数量</label>
+						<div class="col-sm-4">
+							<input id="amount" type="text" class="form-control validate[required,custom[integer]]" maxlength="5"
+							 v-model.lazy="area.amount">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">库位名称</label>
+						<div class="col-sm-4">
+							<label class="control-label myLabel">{{startNO}}</label>
+							<span style="margin: 0 15px">-</span>
+							<label class="control-label myLabel">{{endNO}}</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">库区位置</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control" maxlength="40" v-model="area.location">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">面积</label>
+						<div class="col-sm-4">
+							<input type="text" class="form-control validate[custom[integer]]" maxlength="5" v-model="area.acreage">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-sm-2">备注</label>
+						<div class="col-sm-4">
+							<input type="text" maxlength="50" class="form-control col-sm-3" v-model="area.remark">
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-10 col-sm-offset-2">
+							<button type="button" class="btn btn-success" @click="saveOrUpdate">保存</button>
+							<button type="button" class="btn btn-success" @click="addSp" id="btnAddSp">新增库位</button>
+							<button type="button" class="btn btn-danger" @click="del" v-show="showDelete">删除</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="modal fade" id="myModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+		 aria-hidden="true" >
+			<div class="modal-dialog" style="width: 450px">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">新增库位</h4>
+					</div>
+					<div class="modal-body">
+						<div class="form-horizontal">
+							<form id="modalForm">
+								<div class="form-group">
+									<label class="col-sm-4 control-label">库区名</label>
+									<div class="col-sm-6">
+										<label class="control-label myLabel">{{area.name}}</label>
+									</div>
+								</div>
+								<div class="form-group">
+										<label class="col-sm-4 control-label">停放数量</label>
+										<div class="col-sm-6">
+											<label class="control-label myLabel">{{area.amount}}</label>
+										</div>
+									</div>
+								<div class="form-group">
+									<label class="col-sm-4 control-label myRequired">新增数量</label>
+									<div class="col-sm-6">
+										<input type="text" class="form-control validate[required,custom[integer],funcCall[checkAddAmount]]" id="addAmount">
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">
+							关闭
+						</button>
+						<button type="button" class="btn btn-success" id="btnModalSure">
+							确定
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 共通js -->
+	<script src="../../common/commonjs.js"></script>
+	<script src="js/controller.js"></script>
+</body>
+
+</html>

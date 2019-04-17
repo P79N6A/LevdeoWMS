@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>入库管理</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+  
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+  <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <ol class="breadcrumb pull-right">
+    <li><a href="javascript:;">入库管理</a>
+    </li>
+    <li><a href="javascript:;">打印库位</a>
+    </li>
+  </ol>
+  <h2 class="page-header">打印库位</h2>
+  <hr />
+
+  <div id="myHeader" class="row">
+    <form class="form-horizontal">
+      <div class="form-group col-sm-4">
+        <label class="col-sm-4 control-label myRequired">作业员</label>
+        <div class="col-sm-4" style="padding-right:0;">
+          <input type="text" id="userCode" onkeydown="funkeydown();" onfocus="getInitVal();"
+            onblur="chkdiffVal();" class="form-control inpleft validate[required, funcCall[chkuser]]" />
+        </div>
+        <div class="col-sm-4" style="padding-left:0;">
+          <input type="text" id="userName" class="form-control inpright" readonly />
+        </div>
+      </div>
+
+      <div class="form-group col-sm-8">
+        <div class="row pull-right">
+          <button type="button" id="btnSave" class="btn btn-success">保存</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <audio id="infomp3" autoplay="autoplay"></audio>
+
+  <script id="tbhead1" type="text/html">
+    <tr>
+      <th width="60px">序号</th>
+      <th width="">入库交接单</th>
+      <th width="">物料编码</th>
+      <th width="">物料描述</th>
+      <th width="">VIN码</th>
+      <th width="">成品库</th>
+      <th width="">库位号</th>
+    </tr>
+  </script>
+  <script id="tbhead2" type="text/html">
+    <tr>
+      <th width="60px">序号</th>
+      <th width="">入库交接单</th>
+      <th width="">物料编码</th>
+      <th width="">物料描述</th>
+      <th width="">VIN码</th>
+      <th width="">成品库</th>
+      <th width="">库位号</th>
+      <th width="6px" style="padding:0;"></th>
+    </tr>
+  </script>
+  <div id="myContent" class="row">
+    <div class="col-xs-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+            <table id="mainTable" v-cloak class="table table-bordered table-datas fixedHead" >
+              <thead>
+                <tr>
+                  <th width="60px">序号</th>
+                  <th width="">入库交接单</th>
+                  <th width="">物料编码</th>
+                  <th width="">物料描述</th>
+                  <th width="">VIN码</th>
+                  <th width="">成品库</th>
+                  <th width="">库位号</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, index) in items">
+                  <td width="60px" style="text-align:right;">{{index+1}}</td>
+                  <td width="" class="nopadding">
+                      <input name="wsTransition" onkeydown="funwskeydown(this);"
+                        onfocus="getwsInitVal(this);" onblur="chkwsdiffVal(this);" class="form-control"
+                        style="background-color:rgb(250, 255, 189);" />
+                  </td>
+                  <td width="">{{item.matCode}}</td>
+                  <td width="" class="textover" v-bind:title="item.matName">{{item.matName}}</td>
+                  <td width="">{{item.vin}}</td>
+                  <td width="">{{item.productStockName}}</td>
+                  <td width="">{{item.stockPositionName}}</td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 结束 #page-container 页面容器 -->
+  
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/argoxPrint.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

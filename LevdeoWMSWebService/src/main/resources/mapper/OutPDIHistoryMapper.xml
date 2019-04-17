@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.OutPDIHistoryMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.OutPDIHistory">
+        <id column="invoiceCode" property="invoiceCode" />
+        <result column="vin" property="vin" />
+        <result column="outBoundCode" property="outBoundCode" />
+        <result column="inspector" property="inspector" />
+        <result column="reason" property="reason" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        invoiceCode, vin, outBoundCode, inspector, reason, createId, createTime, updateId, updateTime
+    </sql>
+	<select id="outPDITable" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select 
+			a.invoiceCode,
+			a.vin,
+			a.outBoundCode,
+			a.inspector,
+			a.reason,
+			format(a.createtime,'yyyy-MM-dd') createtime,
+			b.matCode,
+			c.name
+		from outPDIHistory a
+
+		left join stock b
+			on	a.vin =	b.vin
+
+		left join mainMat c
+			on b.matCode = c.code
+
+		inner join sysUser su
+			on a.createid = su.userCode and su.warehouse = #{warehouse}
+
+		where 
+		1=1
+		<if test="invoiceCode!=null and invoiceCode!=''">
+			and invoiceCode like '%'+LOWER(#{invoiceCode})+'%'
+		</if>
+
+		<if test="vin!=null and vin!=''">
+			and a.vin like '%'+LOWER(#{vin})+'%'
+		</if>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+
+	</select>
+</mapper>

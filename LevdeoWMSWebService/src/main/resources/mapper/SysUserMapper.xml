@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.SysUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.SysUser">
+        <id column="userCode" property="userCode" />
+        <result column="userName" property="userName" />
+        <result column="password" property="password" />
+        <result column="phone" property="phone" />
+        <result column="isDel" property="isDel" />
+        <result column="roleId" property="roleId" />
+        <result column="warehouse" property="warehouse" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+        <result column="sapUserCode" property="sapUserCode" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        userCode, userName, password, phone, isDel, roleId, warehouse, createId, createTime, updateId, updateTime, sapUserCode
+    </sql>
+
+	<!---->
+	<select id="checkUser"
+		parameterType="com.tre.jdevtemplateboot.web.pojo.UserParameterBean"
+		resultType="java.util.Map">
+		SELECT
+			s.userCode,
+			s.userName,
+			s.phone,
+			r.roleName,
+			s.roleId,
+			s.warehouse warehouses,
+			p.subName ustatus,
+			w.name warehouseName,
+			s.sapUserCode
+		FROM sysUser s
+
+		LEFT JOIN sysRole r
+			ON s.roleId=r.roleId
+
+		LEFT JOIN sysParm P
+			ON p.code='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_ACCOUNT_STATUS}'
+			AND	p.subCode=s.isDel
+
+		LEFT JOIN sysWarehouse w
+			ON w.warehouseCode=s.warehouse
+
+		<where>
+			<if test="userCode!=null and userCode!=''">
+				AND upper(s.userCode) LIKE '%'+upper(#{userCode})+'%'
+			</if>
+
+			<if test="userName!=null and userName!=''">
+				AND upper(s.userName) LIKE '%'+upper(#{userName})+'%'
+			</if>
+
+			<if test="roleName!=null and roleName!=''">
+				AND s.roleId = #{roleName}
+			</if>
+		</where>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+
+	</select>
+
+	<!-- 获取user对应的group -->
+	<select id="getUserGroup" resultType="java.util.Map">
+		SELECT
+			distinct
+			sysUser.userCode,
+			sysUser.userName,
+			sysf.groupCode,
+			sysf.groupName,
+			sysf.groupIcon
+		FROM sysUser
+		
+		INNER JOIN sysRoleFunction sysrf
+			ON sysUser.roleId=sysrf.roleId
+		
+		INNER JOIN sysFunction sysf
+			ON sysrf.functionId=sysf.functionId
+		
+		WHERE sysUser.userCode=#{userCode}
+	</select>
+
+	<!-- 获取user对应的function -->
+	<select id="getUserFunction" resultType="java.util.Map">
+		SELECT
+			sysf.groupCode,
+			sysf.functionId,
+			sysf.functionName,
+			sysf.url
+		FROM sysUser
+		
+		INNER JOIN sysRoleFunction sysrf
+			ON sysUser.roleId=sysrf.roleId
+		
+		INNER JOIN sysFunction sysf
+			ON sysrf.functionId=sysf.functionId
+		
+		WHERE sysUser.userCode=#{userCode}
+			order by sysf.groupCode,sysf.functionId
+	</select>
+</mapper>

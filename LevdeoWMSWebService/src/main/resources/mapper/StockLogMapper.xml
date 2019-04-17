@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.StockLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.StockLog">
+        <result column="vin" property="vin" />
+        <result column="matCode" property="matCode" />
+        <result column="operateCode" property="operateCode" />
+        <result column="oldStorageNo" property="oldStorageNo" />
+        <result column="newStorageNo" property="newStorageNo" />
+        <result column="reason" property="reason" />
+        <result column="createId" property="createId" />
+        <result column="createTime" property="createTime" />
+        <result column="updateId" property="updateId" />
+        <result column="updateTime" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        vin, matCode, operateCode, oldStorageNo, newStorageNo, reason, createId, createTime, updateId, updateTime
+    </sql>
+
+	<!-- 查询 -->
+	<select id="searchLogData" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT mainMat.name,
+			   sysParm.subName AS operateName,
+			   CASE WHEN (stockLog.bgdUserName IS NULL OR LTRIM(RTRIM(stockLog.bgdUserName))='')
+					 THEN sysUser.userName
+					 ELSE stockLog.bgdUserName
+			   END AS operator,
+			   stockLog.vin,
+			   stockLog.matCode,
+			   stockLog.operateCode,
+			   stockLog.sapOrderNum,
+			   stockLog.oldStorageNo,
+			   stockLog.newStorageNo,
+			   stockLog.reason,
+			   stockLog.createId,
+			   stockLog.updateId,
+			   CONVERT(VARCHAR(100), stockLog.createTime, 23) AS createTime,
+			   CONVERT(VARCHAR(100), stockLog.updateTime, 23) AS updateTime
+		FROM stockLog
+		INNER JOIN mainMat
+			ON stockLog.matCode = mainMat.code
+
+		INNER JOIN sysParm
+			ON sysParm.code = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@PARAM_TYPE_STOCKLOG_TYPE}'
+			AND stockLog.operateCode = sysParm.subCode
+
+		INNER JOIN sysUser
+			ON stockLog.createId = sysUser.userCode
+			AND sysUser.warehouse = #{warehouse}
+
+		WHERE
+			1=1
+		<if test="vin!=null and vin!=''">
+			AND UPPER(stockLog.vin) LIKE '%'+UPPER(#{vin})+'%'
+		</if>
+
+		<if test="matName!=null and matName!=''">
+			AND mainMat.name LIKE '%'+#{matName}+'%'
+		</if>
+
+		<if test="operator!=null and operator!=''">
+			AND sysUser.userName LIKE '%'+#{operator}+'%'
+		</if>
+
+		<if test="operateDate!=null and operateDate!=''">
+			AND CONVERT(varchar(100), stockLog.updateTime, 23) = #{operateDate}
+		</if>
+
+		<if test="operateCode!=null and operateCode!=''">
+			AND stockLog.operateCode=#{operateCode}
+		</if>
+
+		<if test="orderColumn != null and orderColumn != ''">
+			order by ${orderColumn} ${orderDir}
+		</if>
+
+	</select>
+</mapper>

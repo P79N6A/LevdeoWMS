@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>WMS系统</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+  <link rel="shortcut icon" href="favicon.ico" />
+
+  <!-- CSS -->
+  <link href="assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- 图标字体文件需放置font文件夹到font-awesome.min.css上层目录 可从示例代码中获取font文件 -->
+  <link href="assets/plugins/jquery.validationEngine/css/validationEngine.jquery.css" rel="stylesheet">
+  <link href="assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <link href="assets/css/ui.min.css" rel="stylesheet">
+  <link href="assets/plugins/toastr/css/toastr.min.css" rel="stylesheet">
+  <link href="common/commonstyle.css" rel="stylesheet">
+  
+  <!-- JS 严格遵守引入顺序 -->
+  <script src="assets/plugins/jquery/jquery.min.js"></script>
+  <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/ui.min.js"></script>
+  <script src="assets/plugins/toastr/js/toastr.min.js"></script>
+  <script src="assets/js/vue.min.js"></script>
+  <script src="common/constant.js"></script>
+  <script src="common/common.js"></script>
+  <script src="common/messageConstant.js"></script>
+  <script src="assets/plugins/jquery.validationEngine/js/jquery.validationEngine.js"></script>
+  <script src="assets/plugins/jquery.validationEngine/js/languages/jquery.validationEngine-zh_CN.js"></script>
+</head>
+
+<style type="text/css">
+  ul.sub-menu li {
+    cursor: pointer;
+  }
+</style>
+
+<body style="overflow:hidden">
+  <!-- 开始 #page-loader 全局loading -->
+  <div id="page-loader" class="fade"><span class="spinner"></span>
+  </div>
+  <!-- 结束 #page-loader 全局loading-->
+  <!-- 开始 #page-container 页面容器 -->
+  <div id="page-container" class="page-sidebar-fixed page-header-fixed" v-cloak>
+    <!-- 开始 #header 顶栏 -->
+    <div id="header" class="header navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <img src="assets/img/icon.png" style="height: 54px;float:left;">
+        <div id="topDiv" class="navbar-header navbar-header-without-bg" style="cursor:pointer;" onclick="location.href='index.html'">
+          <h3 style="margin: 15px 0 0 20px">雷丁电动汽车WMS系统</h3>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+          <li class="dropdown navbar-user">
+            <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
+              <div class="ui-user-photo" style="background:url(assets/img/user.jpg)"></div>
+              <span class="hidden-xs" id="spanUser"></span>
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu animated fadeInLeft">
+              <li class="arrow"></li>
+              <li><a href="javascript:;" onclick="modalShow()">修改密码</a> </li>
+              <li class="divider"></li>
+              <li><a href="javascript:;" onclick="cancelUser()">注销</a> </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!-- 结束 #header 顶栏 -->
+    <!-- 开始 #sidebar 侧边栏 -->
+    <div id="sidebar" class="sidebar">
+      <div class="scroll-container" data-scrollbar="true" data-height="100%">
+        <ul class="nav">
+          <!--Vue动态加载-->
+          <li class="has-sub putAway" v-for="(option,index) in options" v-bind:value="options[index].groupCode">
+            <a href="javascript:;"> <b class="caret pull-right"></b>
+              <i v-bind:class="options[index].groupIcon"></i>
+              <span>{{options[index].groupName}}</span>
+            </a>
+            <ul class="sub-menu">
+              <li v-for="(op,index2) in options[index].functionList" v-bind:value="options[index].functionList[index2].functionId">
+                <a v-bind:data-url="options[index].functionList[index2].url" v-on:click="loadingPage(index,index2)">{{options[index].functionList[index2].functionName}}</a></li>
+            </ul>
+          </li>
+          <!--Vue动态加载 END-->
+          <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-left"></i></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!-- 结束 #sidebar 侧边栏 -->
+
+    <!-- 开始 #content 面包屑导航 -->
+    <div id="content" class="content" style="padding:0">
+      <!-- 开始 主体内容 -->
+      <div id="content-body">
+        <iframe src="" frameborder="0" scrolling="no" style="border:0;width:100%;height:100%;" id="Iframe"></iframe>
+      </div>
+      <!-- 结束 主体内容 -->
+    </div>
+  </div>
+  <!-- 开始 修改密码-modal -->
+  <div class="modal fade" id="myModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+    aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">修改密码</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-horizontal" id="modalLabel">
+            <form id="valiForm">
+              <div class="form-group">
+                <label class="col-sm-4 control-label myRequired">原密码:</label>
+                <div class="col-sm-6">
+                  <input type="password" autocomplete="off"  class="form-control validate[required,maxSize[20],custom[onlyLetterNumber]]" id="oldPassword">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-4 control-label myRequired">新密码:</label>
+                <div class="col-sm-6">
+                  <input type="password" autocomplete="off" class="form-control validate[required,minSize[6],maxSize[20],custom[onlyLetterNumber]]"
+                    id="newPassword">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-4 control-label myRequired">确认密码:</label>
+                <div class="col-sm-6">
+                  <input type="password" autocomplete="off" class="form-control validate[required,minSize[6],maxSize[20],custom[onlyLetterNumber],equals[newPassword]]"
+                    id="confirmPassword">
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            关闭
+          </button>
+          <button type="button" class="btn btn-success" id="btnModalSure">
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 结束 修改密码-modal -->
+  <script>
+    $(function () {
+      //加载menu
+      showMenu();
+
+      //表单验证初始化
+      $("#valiForm").validationEngine('attach',{
+        //只在表单提交的时候验证
+        // validationEventTrigger:null,
+        //错误提示距离顶部偏移量
+        scrollOffset: 100,
+        isOverflown: true,
+        //自动隐藏-时间3000毫秒
+        autoHidePrompt: true,
+        autoHideDelay: 3000
+      });
+      
+      //Modal确定按钮点击事件 
+      $(document).on('click', '#btnModalSure', function () {
+        oldPassword = $("#oldPassword").val().trim();
+        newPassword = $('#newPassword').val().trim();
+        confirmPassword = $('#confirmPassword').val().trim();
+
+        if (!$("#valiForm").validationEngine("validate")) {
+          return;
+        }
+        //弹出确认框-执行修改密码
+        openConfirmDialog(MESSAGE.CONFIRM_SAVE, function () { updatePassword(oldPassword, newPassword) });
+      });
+
+    });
+
+    //menu-显示当前User对应的menu
+    function showMenu() {
+      var textAjax = {
+        type: 'POST',
+        url: '/LevdeoWMSWebService/sys-user/showMenu',
+        datatype: 'json',
+        success: function (resp) {
+          if (resp.code == "0") {
+            //TOP-user
+            constant.loginUser = resp.data[0].userCode;
+            constant.loginUserName = resp.data[0].userName;
+            $("#spanUser").html(constant.loginUserName + "(" + constant.loginUser + ")");
+
+            //没权限提示
+            if(!resp.data[0].groupCode){
+              toastr.warning(resp.msg);
+            }
+
+            //Vue-menu
+            var vm = new Vue({
+              el: '#page-container',
+              data: {
+                options: resp.data
+              },
+              methods: {
+                loadingPage: function (index, subIndex) {
+                  //获取url
+                  dataUrl = vm.options[index].functionList[subIndex].url;
+                  titleName = vm.options[index].functionList[subIndex].functionName;
+
+                  $(document).attr("title", titleName);
+                  $("#Iframe").attr('src', dataUrl);
+                  $("#content-body").height(document.body.clientHeight - $("#header").height());
+                }
+              }
+            });
+            //登录后显示库存一览
+            // $("#Iframe").attr('src', 'stockManage/stockList/index.html');
+            $("#content-body").height(document.body.clientHeight - $("#header").height());
+          } else {
+            toastr.error(MESSAGE.ERROR_SERVER_EXCEPTION);
+          }
+        },
+        error: function () {
+          toastr.error(MESSAGE.ERROR_SERVER_EXCEPTION);
+        }
+      }
+      $._ajax(textAjax);
+    }
+
+    //弹出modal-修改密码
+    function modalShow() {
+      $('#myModal').modal('show');
+      //清空input并获取焦点
+      $('#oldPassword').val("").focus();
+      $('#newPassword').val("");
+      $('#confirmPassword').val("");
+      
+    }
+
+    //注销用户
+    function cancelUser() {
+      //localStorage.removeItem("token");
+      localStorage.clear();
+      location.href = "login.html";
+    }
+
+    //修改密码
+    function updatePassword(oldPassword, newPassword) {
+      var textAjax = {
+        type: 'POST',
+        url: '/LevdeoWMSWebService/sys-user/updateUserPwd',
+        data: { "oldPassword": oldPassword, "newPassword": newPassword },
+        datatype: 'json',
+        success: function (resp) {
+          if (resp.code == "0") {
+            //隐藏Modal
+            $('#myModal').modal('hide');
+            toastr.success("密码修改成功。");
+          } else {
+            toastr.warning(resp.msg);
+          }
+        },
+        error: function () {
+          toastr.error(MESSAGE.ERROR_SERVER_EXCEPTION);
+        }
+      }
+      $._ajax(textAjax);
+    }
+  </script>
+</body>
+
+</html>

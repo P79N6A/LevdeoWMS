@@ -1,0 +1,123 @@
+
+.breadcrumb.pull-right{
+    margin-right: 10px;
+}
+
+.page-header{
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+hr{
+    border-color: lightgray;
+    margin-top: -10px;
+}
+
+
+/*****业务页面header设定*****/
+#myHeader{
+    margin-bottom: 10px;
+}
+
+#myHeader .form-group{
+    margin-top: 0;
+    margin-bottom: 5px;
+    margin-left: 0;
+    margin-right: 0px;
+}
+
+#myHeader .form-group:last-child{
+    padding-right: 40px;
+}
+
+.form-group > .control-label{
+    font-weight: normal;
+}
+
+.myRequired:before{
+    content: "*";
+    color: red;
+    padding-right: 5px;
+}
+
+.myLabel{
+    text-align: left !important;
+}
+
+#myContent,#myFooter{
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+/*****select2 样式设定*****/
+div.select2-container{
+    width: 100%;
+}
+.select2-container .select2-choice {
+    background-image: none;
+}
+.select2-container .select2-choice .select2-arrow{
+    border-left: none !important;
+}
+.select2-container b{
+    margin-left: -15px !important;
+}
+
+
+#myContent th{
+    text-align: center
+}
+
+/**用于打印分页**/
+.A4 {
+    page-break-before: auto;        
+    page-break-after: always;
+}
+
+/**datatable td自动宽度**/
+.dataTable td{
+    white-space: nowrap;
+}
+
+/**固定表头**/
+table.fixedHead tbody{
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+table.fixedHead thead, table.fixedHead tbody tr{  
+    width: 100%;
+    display: table;
+    table-layout: fixed;
+}
+/**固定表头**/
+
+/**td超出的内容显示...**/
+.textover{
+    white-space:nowrap; 
+	overflow:hidden; 
+	text-overflow:ellipsis;
+}
+
+/**VUE去除{{XXX}}闪现**/
+[v-cloak]{
+    display: none!important;
+}
+
+table input[type=checkbox]{
+    margin: 0px !important;
+}
+
+/**靠右**/
+.alignRight{
+    text-align: right;
+}
+
+input[disabled],select[disabled]{
+    background: transparent !important;
+    opacity: 1 !important;
+}
+
+abbr.select2-search-choice-close{
+    margin-right: 15px;
+}

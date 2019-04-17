@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.WarehousingPrintMapper">
+
+    <!-- 获取作业员名 -->
+    <!-- 某些mybatis版本，如果仅传入一个类型为String的参数，那么在 xml文件中应该使用 _parameter 来代替参数名。
+    	 也可以在mapper的接口中，给这个方法的参数加上@Param(value=“id”)、@Param("id)String id)，
+    	 这样就能在.xml中使用#{id,jdbcType=VARCHAR} 了。-->
+    <select id="getUserName" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT userName
+        FROM sysUser
+        WHERE warehouse=#{warehouse}
+        <if test="userCode!=null and userCode!=''">
+            AND userCode = #{userCode}
+
+        </if>
+    </select>
+
+    <!-- 根据入库交接单号，查询信息 -->
+    <select id="getWarehousingInfo" parameterType="java.lang.String" resultType="java.util.Map">
+        SELECT
+          hous.*,
+          mainMat.name AS matName,
+          pos.name AS stockPositionName,
+          stock.name AS productStockName
+        FROM warehousingSchedule hous
+
+        INNER JOIN mainMat
+          ON hous.matCode = mainMat.code
+
+        INNER JOIN mainProductStock stock
+          ON hous.productStockCode = stock.code
+
+        INNER JOIN sysStockPosition pos
+          ON hous.stockPosition = pos.stockPosition
+
+        WHERE 1=1
+        <if test="_parameter!=null and _parameter!=''">
+            AND wsTransition = #{_parameter}
+        </if>
+    </select>
+
+    <!-- 保存 -->
+    <insert id="saveWarehousingInfo" parameterType="java.lang.String">
+        INSERT INTO stockLog(
+                              vin,
+                              matCode,
+                              operateCode,
+                              oldStorageNo,
+                              createId,
+                              createTime,
+                              updateId,
+                              updateTime
+                              )VALUES
+        <foreach collection="wareinfoList" item="item" separator=",">
+                                    (
+                                    #{item.vin},
+                                    #{item.matCode},
+                                    #{operateCode},
+                                    #{item.stockPositionName},
+                                    #{userCode},
+                                    GETDATE(),
+                                    #{userCode},
+                                    GETDATE()
+                                    )
+        </foreach>;
+    </insert>
+</mapper>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>发货</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+  <link href="css/style.css" rel="stylesheet">
+
+  <style>
+    #divPrintPick,
+    #divPrintOut {
+      display: none;
+    }
+
+    #divShow {
+      display: block;
+    }
+  </style>
+  <style media="print">
+    #divPrintPick,
+    #divPrintOut {
+      display: block;
+    }
+
+    #divShow {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="divShow">
+    <ol class="breadcrumb pull-right">
+      <li><a href="javascript:;">出库管理</a>
+      </li>
+      <li><a href="javascript:;">出库</a>
+      </li>
+    </ol>
+    <h2 class="page-header">出库</h2>
+    <hr />
+    <div id="myHeader" v-cloak>
+      <form id="valiForm">
+        <div class="row">
+          <div class="form-horizontal">
+            <div class="form-group col-sm-4">
+              <label class="col-sm-4 control-label">客户名称</label>
+              <div class="col-sm-8">
+                <label class="control-label myLabel">{{customerName}}</label>
+              </div>
+            </div>
+            <div class="form-group col-sm-4">
+              <label class="col-sm-4 control-label">销售出库单</label>
+              <div class="col-sm-8">
+                <label class="control-label myLabel" id="outBoundCode">{{outBoundCode}}</label>
+              </div>
+            </div>
+            <div class="form-group col-sm-4">
+              <label class="col-sm-4 control-label" :class="{'myRequired': waitMode}">货运方式</label>
+              <div class="col-sm-8" v-show="waitMode">
+                <select id="shipType" data-type="TRANSPORT_TYPE" class="form-control validate[required]"></select>
+              </div>
+              <div class="col-sm-8" v-show="!waitMode">
+                <label class="control-label myLabel">{{shipTypeName}}</label>
+              </div>
+            </div>
+
+            <div class="form-group col-sm-4">
+              <label class="col-sm-4 control-label">联系电话</label>
+              <div class="col-sm-8">
+                <label class="control-label myLabel">{{contactInformation}}</label>
+              </div>
+            </div>
+
+            <div class="form-group col-sm-4">
+              <label class="col-sm-4 control-label">销售发货单</label>
+              <div class="col-sm-8">
+                <label class="control-label myLabel" id="sapInvoiceCode">{{sapInvoiceCode}}</label>
+              </div>
+            </div>
+            <div class="form-group col-sm-4">
+              <label class="col-sm-4 control-label">物流车位</label>
+              <div class="col-sm-8">
+                <input type="text" id="logisticsParking" class="form-control validate[maxSize[20]]"
+                  v-bind:value="logisticsParking" v-show="waitMode">
+                <label class="control-label myLabel" v-show="!waitMode">{{logisticsParking}}</label>
+              </div>
+            </div>
+
+            <div class="form-group col-sm-8">
+              <label class="col-sm-2 control-label" style="margin-left:-4px">客户地址</label>
+              <div class="col-sm-10">
+                <label class="control-label myLabel">{{customerAddress}}</label>
+              </div>
+            </div>
+            <div class="form-group col-sm-4">
+              <label class="col-sm-4 control-label">物流车号</label>
+              <div class="col-sm-8">
+                <input type="text" id="logisticsVehicleNo" class="form-control validate[maxSize[20]]"
+                  v-bind:value="logisticsVehicleNo" v-show="waitMode">
+                <label class="control-label myLabel" v-show="!waitMode">{{logisticsVehicleNo}}</label>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="form-group col-sm-4" v-show="waitMode">
+              <label class="col-sm-4 control-label">物流公司</label>
+              <div class="col-sm-8">
+                <select id="logisCompany" data-type="LOGIS_COMPANY_LIST" class="form-control"></select>
+              </div>
+            </div>
+            <div class="form-group col-sm-4" v-show="!waitMode">
+              <label class="col-sm-4 control-label">物流公司</label>
+              <div class="col-sm-8">
+                <label class="control-label myLabel">{{logisCompanyName}}</label>
+              </div>
+            </div>
+            <div class="form-group col-sm-4">
+              <label class="col-sm-4 control-label">随车物料</label>
+              <div class="col-sm-8">
+                <input type="text" id="giftName" class="form-control validate[maxSize[50]]" v-bind:value="giftName"
+                  v-show="waitMode">
+                <label class="control-label myLabel" v-show="!waitMode">{{giftName}}</label>
+              </div>
+            </div>
+            <div class="form-group col-sm-4">
+              <div class="row pull-right">
+                <button type="button" class="btn btn-primary" @click="addVins()" v-show="addMode">添加车辆</button>
+                <button type="button" class="btn btn-primary" @click="printPickingList()"
+                  v-show="waitMode">打印备货单</button>
+                <button type="button" class="btn btn-success" @click="warehouseOut()" v-show="waitMode">出库</button>
+                <button type="button" class="btn btn-primary" @click="printOutList()" v-show="sendedMode">打印出库单</button>
+                <button type="button" class="btn btn-success" @click="doWash()" v-show="washMode">冲销</button>
+                <button type="button" class="btn btn-success" v-show="false"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="myContent" class="row">
+      <div class="col-xs-12">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div id="parDiv">
+              <table id="tableBox" class="table table-bordered table-datas" style="min-width:100%"></table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="myModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog"
+    aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 500px">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">换车</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-horizontal" id="modalLabel">
+            <form id="modalForm">
+              <div class="form-group">
+                <label class="col-sm-4 control-label">物料编码</label>
+                <div class="col-sm-8">
+                  <label class="control-label myLabel" id="modalMatCode"></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-4 control-label">物料描述</label>
+                <div class="col-sm-8">
+                  <label class="control-label myLabel" id="modalMatName"></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-4 control-label">当前VIN</label>
+                <div class="col-sm-8">
+                  <label class="control-label myLabel" id="modalOldVIN"></label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-4 control-label myRequired">新VIN</label>
+                <div class="col-sm-6">
+                  <input class="form-control validate[required]" id="iptNewVIN">
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">
+            关闭
+          </button>
+          <button type="button" class="btn btn-success" id="btnModalSave">
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="invoiceCode" />
+  </div>
+
+  <!-- 添加车辆 -->
+  <div class="modal fade" id="addVinsModal" data-backdrop="static" data-keyboard="false" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="width:100%; height:500px;">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">添加车辆</h4>
+        </div>
+        <div class="modal-body">
+          <div class="panel panel-primary">
+            <div class="panel-body" style="height: 340px;">
+              <table id="tableAddVins" class="table table-bordered table-datas" style="min-width:100%"></table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" class="btn btn-success" id="addVinsSave">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 打印备货单-->
+  <div id="divPrintPick"></div>
+  <script id="scrPrintPick" type="text/html">
+      <div class="A4" style="height:390px;">
+          <div class="col-xs-12" style="text-align:center; font-size:medium;">${companyName}</div>
+          <div class="col-xs-12" style="text-align:center; font-size:medium;">发货通知单</div>
+          <div class="col-sm-12">
+              <label class="control-label" style="width:49%;">售达方：　　${salecustomName}</label>
+              <label class="control-label" style="width:25%;">销售订单：　${salesOrder}</label>
+              <label class="control-label" style="width:25%;">物流车位：　${logisticsParking}</label>
+          </div>
+          <div class="col-sm-12">
+              <label class="control-label" style="width:49%;">送达方：　　${sendcustomName}</label>
+              <label class="control-label" style="width:25%;">发货单号：　${sapInvoiceCode}</label>
+              <label class="control-label" style="width:25%;">物流车号：　${logisticsVehicleNo}</label>
+          </div>
+          <div class="col-sm-12">
+              <label class="control-label" style="width:49%;">开单日期：　${createDate}</label>
+              <label class="control-label" style="width:25%;">货运方式：　${shipType}</label>
+              <label class="control-label" style="width:25%;">随车物料：　${giftName}</label>
+          </div>
+          <div class="col-sm-12">
+              <label class="control-label" style="width:10%;float:left">送达方地址：</label>
+              <label class="control-label" style="width:39%;">${sendcustomAddress}</label>
+          </div>
+          <div class="col-sm-12" style="height:300px;">
+              <table name="stockTablePrint" v-cloak class="table-print" style="width:100%;table-layout:fixed;">
+                  <thead>
+                      <tr style="background:none;">
+                          <th width="30px" style="padding-left:0px;padding-right:0px;">项目</th>
+                          <th width="280px">物料描述</th>
+                          <th width="40px" style="padding-left:0px;padding-right:0px;">数量</th>
+                          <th width="110px">发出仓库</th>
+                          <th width="150px">VIN码</th>
+                          <th width="*">库位</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr v-for="(item, index) in items">
+                          <td style="text-align:right;">{{${pagecnt}+index+1}}</td>
+                          <td>{{item.matName}}</td>
+                          <td>{{item.carNumber||1}}</td>
+                          <td>{{item.productStock}}</td>
+                          <td>{{item.vin}}</td>
+                          <td>{{item.stockPosition}}</td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+          <hr class="printHr" style="width:97%;">
+          <div class="col-sm-12">
+              <label style="width:25%; font-weight:normal;">制单人：${makeOrderUser}</label>
+              <label style="width:25%; font-weight:normal;">打印人：${printUser}</label>
+              <label style="width:25%; font-weight:normal;">提车人：</label>
+              <label style="width:22%; text-align:right;  font-weight:normal;">${page}</label>
+          </div>
+      </div>
+  </script>
+
+
+  <!-- 打印出库单-->
+  <div id="divPrintOut"></div>
+  <script id="scrPrintOut" type="text/html">
+    <div class="A4" style="height:390px;">
+        <div class="col-xs-12" style="text-align:center; font-size:large;">${companyName}</div>
+        <div class="col-xs-12">
+            <label class="control-label" style="width:59%;"></label>
+            <label class="control-label" style="width:40%;color:red;">----销售出库单　　${orderType}</label>
+        </div>
+        <div class="col-sm-12">
+            <label class="control-label" style="width:11%;">客户名称：　</label>
+            <label class="control-label" style="width:33%;">${customerName}</label>
+            <label class="control-label" style="width:27%;">销售出库单：　CK${sapInvoiceCode}</label>
+            <label class="control-label" style="width:27%;">货运方式：　${shipType}</label>
+        </div>
+        <div class="col-sm-12">
+            <label class="control-label" style="width:11%;">联系电话：　</label>
+            <label class="control-label" style="width:33%;">${contactInformation}</label>
+            <label class="control-label" style="width:27%;">销售发货单：　${sapInvoiceCode}</label>
+            <label class="control-label" style="width:27%;">随车物料：　${giftName}</label>
+        </div>
+        <div class="col-sm-12">
+            <label class="control-label" style="width:11%;vertical-align: top;">客户地址：　</label>
+            <label class="control-label" style="width:33%;">${customerAddress}</label>
+          </div>
+        <div class="col-sm-12" style="height:300px;">
+            <table name="outTablePrint" v-cloak class="table-print" style="width:100%;table-layout:fixed;">
+                <thead>
+                    <tr style="background:none;">
+                        <th width="30px" style="padding-left:0px;padding-right:0px;">项次</th>
+                        <th width="120px">物料编码</th>
+                        <th width="230px;">物料描述</th>
+                        <th width="40px" style="padding-left:0px;padding-right:0px;">数量</th>
+                        <th width="145px">VIN码</th>
+                        <th width="90px">出库仓库</th>
+                        <th width="*">库位</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in items">
+                        <td style="text-align:right;">{{${pagecnt}+index+1}}</td>
+                        <td>{{item.matCode}}</td>
+                        <td>{{item.matName}}</td>
+                        <td>{{item.carNumber||1}}</td>
+                        <td>{{item.vin}}</td>
+                        <td>{{item.productStock}}</td>
+                        <td>{{item.stockPosition}}</td>
+                    </tr> 
+                </tbody>
+                <tr>
+                    <td colspan="3">　　　　合计:</td>
+                    <td >${tdSum}</td>
+                    <td colspan="3"></td>
+               </tr>
+            </table>
+            <div class="col-xs-12" style="font-size:medium;">整车漆面完好</div>
+        </div>
+        <div class="col-sm-12" id="fiveDiv">
+            <label style="width:20%; font-weight:normal;">白联: 财务留存</label>
+            <label style="width:20%; font-weight:normal;">红联: 回单</label>
+            <label style="width:20%; font-weight:normal;">蓝联: 门卫留存</label>
+            <label style="width:20%; font-weight:normal;">绿联: 交接单</label>
+            <label style="width:17%; font-weight:normal; text-align:right;">黄联: 客户留存</label>
+        </div>
+        <hr class="printHr" style="width:97%;">
+        <div class="col-sm-12">
+            <label style="width:25%; font-weight:normal;">客户签字:</label>
+            <label style="width:25%; font-weight:normal;">制单人：${makeOrderUser}</label>
+            <label style="width:25%; font-weight:normal;">核准人：${outStockUser}</label>
+            <label style="width:22%; text-align:right;  font-weight:normal;">第${page}页</label>
+        </div>
+        <div class="col-sm-12">
+            <label style="width:25%; font-weight:normal;">送达日期:</label>
+            <label style="width:25%; font-weight:normal;">制单日期：${makeOrderDate}</label>
+            <label style="width:25%; font-weight:normal;">核准日期：${outStockDate}</label>
+            <label style="width:22%; text-align:right;  font-weight:normal;">${dateTime}</label>
+        </div>
+    </div>
+  </script>
+
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

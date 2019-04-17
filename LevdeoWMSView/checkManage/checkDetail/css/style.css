@@ -1,0 +1,28 @@
+#divPrint label{
+    font-weight: normal;
+}
+
+.error {
+    /* text-align:left; */
+    border: 2px solid #ff5b57!important;
+}
+
+table#tableBox tr td:nth-child(2),
+table#tableBox tr td:nth-child(7),
+table#tableBox tr td:nth-child(8){
+    padding: 0px;
+    text-align: center;
+    vertical-align: middle;
+    height: 32px;
+}
+
+table#tableBox tr td:nth-child(2) input,
+table#tableBox tr td:nth-child(7) input,
+table#tableBox tr td:nth-child(8) select{
+    width: 100%;
+    height: 100%;
+    padding-left:8px;
+    padding-right:8px;
+    border:none;
+    background-color: rgb(250, 255, 189);
+}

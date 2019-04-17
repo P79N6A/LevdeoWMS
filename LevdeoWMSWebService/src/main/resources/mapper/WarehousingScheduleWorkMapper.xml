@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.WarehousingScheduleWorkMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.WarehousingScheduleWork">
+        <result column="workId" property="workId" />
+        <result column="wsTransition" property="wsTransition" />
+        <result column="productStockCode" property="productStockCode" />
+        <result column="finishedTime" property="finishedTime" />
+        <result column="matCode" property="matCode" />
+        <result column="vin" property="vin" />
+        <result column="sapTransfer" property="sapTransfer" />
+        <result column="cancelSapTransfer" property="cancelSapTransfer" />
+        <result column="sapUserCode" property="sapUserCode" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        workId, wsTransition, productStockCode, finishedTime, matCode, vin, sapTransfer, cancelSapTransfer, sapUserCode
+    </sql>
+
+	<update id="updateWarehousingWork" parameterType="String">
+        ------------step 1
+        --删除入库交接表 sap过账:已作废 的数据
+        DELETE ws FROM warehousingSchedule  ws
+        INNER JOIN  warehousingScheduleWork wsw
+          ON ws.vin = wsw.vin
+        WHERE wsw.workId = #{workId}
+        AND wsw.sapTransfer='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_SAP_CANCELLED}';
+
+        --删除入库交接work表 sap过账:已作废 的数据
+        DELETE FROM warehousingScheduleWork
+        WHERE workId = #{workId}
+        AND sapTransfer='${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_SAP_CANCELLED}';
+
+        ------------step 2
+        --修改入库交接表 sap过账:未复核，修改的人，日期，以及制单人，通过取消过账标识
+        UPDATE ws
+            SET ws.sapTransfer = '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_SAP_WAIT_CHECK}',
+                ws.updateId = sU.userCode,
+                ws.updateTime = GETDATE(),
+                ws.sapUserCode = wsw.sapUserCode
+        FROM warehousingSchedule ws
+        INNER JOIN warehousingScheduleWork wsw
+          ON ws.vin = wsw.vin
+        INNER JOIN sysUser sU
+		  ON wsw.sapUserCode=sU.sapUserCode
+        WHERE wsw.workId = #{workId}
+            AND wsw.cancelSapTransfer = 'X';
+
+
+        --删除取消过账标识的数据
+        DELETE FROM warehousingScheduleWork
+        WHERE workId = #{workId}
+        AND cancelSapTransfer = 'X';
+
+        ------------step 3
+        --如果入库交接work表与入库交接表的入库单号一致，则将入库交接work表中数据更新到入库交接单表中
+        UPDATE ws
+            SET ws.sapTransfer = wSW.sapTransfer,
+                ws.finishedTime = CONVERT(DATE,wSW.finishedTime),
+                ws.wsTransition = wSW.wsTransition,
+                ws.matCode = wSW.matCode,
+                ws.productStockCode = wSW.productStockCode,
+                ws.updateId = sU.userCode,
+                ws.updateTime = GETDATE(),
+                ws.sapUserCode = wSW.sapUserCode
+        FROM warehousingSchedule ws
+        INNER JOIN  warehousingScheduleWork wSW
+            ON ws.vin = wSW.vin
+        INNER JOIN sysUser sU
+			ON wSW.sapUserCode=sU.sapUserCode
+        WHERE wSW.workId = #{workId};
+
+        --删除入库交接work表中 更新完毕的数据
+        DELETE wSW FROM warehousingScheduleWork wSW
+        INNER JOIN warehousingSchedule ws
+        ON ws.vin = wSW.vin
+        WHERE wSW.workId = #{workId};
+
+        ------------step 4
+        --将入库交接work表中剩余的数据保存到入库交接表，车辆状态:待入库
+        INSERT INTO warehousingSchedule (
+										  wsTransition,
+										  vin,
+										  matCode,
+										  finishedTime,
+										  state,
+										  sapTransfer,
+										  productStockCode,
+										  createId,
+										  createTime,
+										  updateId,
+										  updateTime,
+										  sapUserCode
+										  )
+        SELECT DISTINCT wSW.wsTransition,
+                         wSW.vin,
+                         wSW.matCode,
+                         CONVERT(DATE,wSW.finishedTime),
+                         '${@com.tre.jdevtemplateboot.common.constant.SysParamConstant@P_CAR_STATUS_PREWAREHOUSEIN}',
+                         wSW.sapTransfer,
+                         wSW.productStockCode,
+                         sU.userCode,
+                         GETDATE(),
+                         sU.userCode,
+                         GETDATE(),
+                         wSW.sapUserCode
+        FROM warehousingScheduleWork wSW
+        LEFT JOIN sysUser sU
+        ON wSW.sapUserCode=sU.sapUserCode
+        WHERE wSW.vin NOT IN (SELECT vin FROM warehousingSchedule)
+        AND workId = #{workId};
+    </update>
+
+    <!--通过WorkID 获取当前插入入库交接单表的数据-->
+    <select id="getInsertedVin" resultType="com.tre.jdevtemplateboot.domain.po.WarehousingSchedule" parameterType="String">
+        SELECT  ws.* FROM warehousingSchedule ws
+        INNER JOIN warehousingScheduleWork wSW
+          ON ws.vin = wSW.vin
+        WHERE workId = #{workId}
+    </select>
+
+    <!--通过sap账号获取usercode-->
+    <select id="getUserCode" parameterType="String" resultType="String">
+        select distinct su.userCode from SysUser su
+        left join warehousingScheduleWork wSW
+          on wSW.sapUserCode=su.sapUserCode
+        where wSW.workId=#{workId}
+    </select>
+</mapper>

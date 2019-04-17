@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>随车宣传品确认</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+  <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+  <script>
+    var mode = 3;
+  </script>
+  <ol class="breadcrumb pull-right">
+    <li><a href="javascript:;">出库管理</a>
+    </li>
+    <li><a href="javascript:;" id="topA">随车宣传品确认</a>
+    </li>
+  </ol>
+  <h2 class="page-header">随车宣传品确认</h2>
+  <hr />
+  <div id="myHeader" class="row">
+    <div class="form-horizontal">
+      <form id="valiForm">
+        <div class="form-group col-sm-4">
+          <label class="col-sm-3 control-label" style="padding-right:0px;">发货单号</label>
+          <div class="col-sm-9">
+            <input type="text" id="outBoundCode" class="form-control validate[maxSize[20]] justEnglish">
+          </div>
+        </div>
+        <div class="form-group col-sm-4">
+          <label class="col-sm-4 control-label">出库日期</label>
+          <div class="col-sm-8">
+            <input type="text" id="outBoundDate" class="form-control" data-type="DATAPICKER">
+          </div>
+        </div>
+        <div class="form-group col-sm-4">
+          <label class="col-sm-3 control-label">客户名称</label>
+          <div class="col-sm-9">
+            <input type="text" id="customer" class="form-control" data-type="CUSTOMER_LIST">
+          </div>
+        </div>
+
+        <div class="form-group col-sm-12">
+          <div class="row pull-right">
+            <button type="button" id="btnSearch" class="btn btn-primary">查询</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="myContent" class="row">
+    <div class="col-xs-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <table id="tableBox" class="table table-bordered table-datas" style="min-width:100%"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

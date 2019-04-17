@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tre.jdevtemplateboot.mapper.StockMoveSpWorkMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.tre.jdevtemplateboot.domain.po.StockMoveSpWork">
+        <result column="rowNum" property="rowNum" />
+        <result column="vin" property="vin" />
+        <result column="oldPosition" property="oldPosition" />
+        <result column="newPosition" property="newPosition" />
+        <result column="operator" property="operator" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        rowNum, vin, oldPosition, newPosition, operator
+    </sql>
+
+</mapper>

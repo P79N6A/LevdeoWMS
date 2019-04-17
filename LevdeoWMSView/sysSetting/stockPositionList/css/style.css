@@ -1,0 +1,13 @@
+.form-group{
+    margin-top: 0;
+    margin-bottom: 5px;
+    margin-left: 0;
+    margin-right: 5px;
+}
+.form-control{
+    text-align: center;
+}
+
+.option {
+    text-align: center
+}

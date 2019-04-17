@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>预定入库一览</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+</head>
+
+<body>
+
+  <ol class="breadcrumb pull-right">
+    <li><a href="javascript:;">入库管理</a>
+    </li>
+    <li><a href="javascript:;">预定入库一览</a>
+    </li>
+  </ol>
+  <h2 class="page-header">预定入库一览</h2>
+  <hr />
+  <div id="myHeader" class="row">
+    <form class="form-horizontal">
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">完工日期</label>
+        <div class="col-sm-9">
+          <!--  placeholder="VIN码" 提示-->
+          <input id="ipt_finished" name="finished" type="text" class="form-control" data-type="DATAPICKER">
+        </div>
+      </div>
+
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">VIN码</label>
+        <div class="col-sm-9">
+          <input type="text" id="ipt_vin" name="vin" class="form-control justEnglish">
+        </div>
+      </div>
+
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">状态</label>
+        <div class="col-sm-9">
+          <select id="sel_state" name="state" data-live-search="false" class="form-control" data-type="WAREHOUSE_STATUS">
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">SAP过账</label>
+        <div class="col-sm-9">
+          <select id="sel_sap" name="sap" data-live-search="false" class="form-control" data-type="SAP_TYPE">
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group col-sm-8">
+        <div class="row pull-right">
+          <button type="button" id="btnup" class="btn  btn-primary">查询</button>
+          <button type="button" id="btnExport" class="btn btn-primary">导出</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div id="myContent" class="row">
+    <div class="col-xs-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <table id="tableBox" class="table table-bordered table-datas" style="min-width:100%"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修改库位弹窗 -->
+  <div class="modal fade" data-backdrop="static" data-keyboard="false" id="updateStockPosition">
+    <div class="modal-dialog" style="width:400px">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">修改库位号</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-horizontal">
+
+            <div class="form-group col-sm-12">
+              <label class="control-label col-sm-4">入库交接单</label>
+              <div class="col-sm-8">
+                <label id="lb_matCode" class="control-label myLabel">{{formData.wsTransition}}</label>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group col-sm-12">
+              <label class="control-label col-sm-4">物料编码</label>
+              <div class="col-sm-8">
+                <label class="control-label myLabel">{{formData.matCode}}</label>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group col-sm-12">
+              <label class="control-label col-sm-4">物料描述</label>
+              <div class="col-sm-8">
+                <label class="control-label myLabel">{{formData.matDescription}}</label>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group col-sm-12">
+              <label class="col-sm-4 control-label">VIN码</label>
+              <div class="col-sm-8">
+                <label id="lb_vin" class="control-label myLabel">{{formData.vin}}</label>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="form-group col-sm-12">
+              <label class="col-sm-4 control-label">原库位号</label>
+              <div class="col-sm-8">
+                <label class="control-label myLabel">{{formData.stockPosition}}</label>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+            <form>
+              <div class="form-group col-sm-12">
+                <label class="col-sm-4 control-label myRequired">新库位号</label>
+                <div class="col-sm-8">
+                  <select id="newSel_position" data-live-search="false" class="form-control validate[required]" v-model="formData.selectedSp">
+                    '<option v-for="sp in spList" v-bind:value="sp.stockPosition">{{ sp.name }}</option>',
+                  </select>
+                </div>
+
+              </div>
+            </form>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-sm btn-white" data-dismiss="modal">关闭</button>
+          <button class="btn btn-sm btn-success" v-on:click="saveNewSp">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

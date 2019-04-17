@@ -1,0 +1,23 @@
+.message-showBtn button {
+  margin-bottom: 5px;
+}
+
+#content-body {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+  /* .panel-body{
+    padding: 0 0 0 0;
+  } */
+
+.layui-laydate-main {
+  border: 0px;
+  width: 100%;
+  height: 300px;
+  display: inline-block;
+}
+
+  /* #main1 .layui-laydate-content td,
+  #main1 .layui-laydate-content th {
+    width: 50px;
+  } */

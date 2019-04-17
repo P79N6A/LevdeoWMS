@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>主数据维护</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+
+  <style>
+    #Content{
+      position: absolute;
+      top:118px;
+      left:67%;
+    }
+
+    .myActive td{
+      background-color: bisque !important;
+    }
+  </style>
+</head>
+
+<body>
+  <ol class="breadcrumb pull-right">
+    <li><a href="javascript:;">系统设置</a>
+    </li>
+    <li><a href="javascript:;">主数据维护</a>
+    </li>
+  </ol>
+  <h2 class="page-header">主数据维护</h2>
+  <hr />
+  <div id="myHeader" class="row">
+    <div class="form-horizontal">
+      <div class="form-group col-sm-6">
+        <label class="col-sm-3 control-label">主数据类型</label>
+        <div class="col-sm-9">
+          <label class="control-label myLabel" id="paramLabel"></label>
+        </div>
+      </div>
+      <div class="form-group col-sm-6">
+        <div class="pull-right">
+          <button id='openDialog' type="button" class="btn btn-success">添加</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script id="tbhead1" type="text/html">
+    <tr>
+      <th width="10%">序号</th>
+      <th width="60%">主数据名称</th>
+    </tr>
+  </script>
+  <script id="tbhead2" type="text/html">
+    <tr>
+      <th width="10%">序号</th>
+      <th width="60%">主数据名称</th>
+      <th width="6px" style="padding:0;"></th>
+    </tr>
+  </script>
+  <div id="myContent" class="row" style="position:relative">
+    <div class="col-xs-5">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h4 class="panel-title">主数据类型</h4>
+        </div>
+        <div class="panel-body">
+          <table id="tableBox" class="table table-bordered table-datas" style="min-width:100%"></table>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-7">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h4  id="mainInfoTitle" class="panel-title">主数据详情</h4>
+        </div>
+        <div class="panel-body">
+          <table id="tableBoxFunc" class="table table-bordered table-datas" style="min-width:100%"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新建/更新主数据弹出框 -->
+  <div class="modal fade" data-backdrop="static" data-keyboard="false" id="modalCreate">
+    <div class="modal-dialog" style="width:400px">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 id="tName"  class="modal-title">添加</h4>
+        </div>
+        <form id="myform" class="form-horizontal form-id" onkeydown="if(event.keyCode==13)return false;">
+          <div class="modal-body">
+              <div class="form-group col-sm-12">
+                  <label class="control-label col-sm-4 ">主数据类型</label>
+                  <div class="col-sm-8">
+                    <label id="mainDateType" class="control-label myLabel"></label>
+                  </div>
+                </div>
+
+            <div class="form-group col-sm-12">
+              <label id="lbSt" class="control-label col-sm-4 myRequired">{{lbCode}}</label>
+              <div class="col-sm-8">
+                <input type="text" id="iptCode" maxlength='15' v-show="showMode1" v-model="mainCode" class="form-control justNumber validate[required]" maxlength="8">
+                <label v-show="!showMode1" class="control-label myLabel">{{mainCode}}</label>
+              </div>
+              
+            </div>
+
+            <div class="form-group col-sm-12">
+              <label id="lbNd" class="control-label col-sm-4 myRequired">{{lbName}}</label>
+              <div class="col-sm-8">
+                <input type="text" id="iptName" maxlength="65"  v-model="mainName"  class="form-control validate[required]" maxlength="15">
+              </div>
+            </div>
+
+            <div id="divRd" v-show="showMode2" class="form-group col-sm-12">
+                <label id="lbRd" class="control-label col-sm-4 myRequired">{{lbSubCode}}</label>
+                <div class="col-sm-8">
+                  <input type="text"  id="iptRd"  maxlength="15" v-show="showMode3" v-model="mainSubCode" class="form-control justNumber validate[required]" maxlength="18">
+                  <label v-show="!showMode3" class="control-label myLabel">{{mainSubCode}}</label>
+                </div>
+            </div>
+            <div id="divTh" v-show="showMode2" class="form-group col-sm-12">
+                <label id="lbTh" class="control-label col-sm-4 myRequired">{{lbSubName}}</label>
+                <div class="col-sm-8">
+                  <input type="text"  id="iptTh" maxlength="65"  v-model="mainSubName"  class="form-control validate[required]" maxlength="80">
+                  
+                </div>
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </form>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">关闭</button>
+          <button id="btnSave" type="button" class="btn btn-sm btn-success" id="createBtn" >确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 结束 #page-container 页面容器 -->
+
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

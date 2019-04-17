@@ -1,0 +1,78 @@
+#====================== tomcat配置#============================
+server:
+  port: 8080
+  servlet:
+    context-path: /LevdeoWMSWebService
+  tomcat:
+    uri-encoding: UTF-8
+
+#==================== 数据库密码加密・配置  =====================
+jasypt:
+  encryptor:
+    password: true
+
+#==================== PageHelper 分页插件  ==================
+#数据库类型
+#(PostgreSQL,SqlServer[2005,2008],SqlServer2012,Mysql,Oracle,MariaDB)
+pagehelper:
+  helper-dialect: SqlServer
+  reasonable: false
+  support-methods-arguments: true
+  params: count=countSql
+
+#==================== 自定义配置 ====================
+com:
+  tre:
+    jdev:
+      operator-log: 0 #操作log是否存储到DB中( 0:不开启，1：开启 [开启的情况下需在aop包的OperatorLogToDbAspect.java文件具体实现])
+
+#==================== http and druid・配置  ====================
+spring:
+  profiles:
+    active: dev
+  http:
+    encoding:
+      enabled: true
+      force: true
+      charset: utf-8
+  jmx:
+    enabled: false
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    tomcat:
+      max-active: 100
+      initial-size: 10
+      max-wait: 60000
+      min-idle: 10
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: select 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      thymeleaf:
+        cache: false
+        servlet:
+          content-type: text/html
+        encoding: utf-8
+        prefix: classpath:/templates/
+        suffix: .html
+  mail:
+    host: cn.tre-inc.com
+    username: 10004299yuan_mingyin@cn.tre-inc.com
+    ##ENC(password)
+    password: password
+    default-encoding: UTF-8
+    protocol: smtp
+
+  jackson:
+    date-format: yyyy-MM-dd
+
+#
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.tre.jdevtemplateboot.domain.po
+
+
+
+

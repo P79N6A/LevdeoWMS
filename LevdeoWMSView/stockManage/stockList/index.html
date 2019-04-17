@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>库存一览</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <meta content="" name="description">
+  <meta content="" name="author">
+
+  <!-- 共通css -->
+  <script src="../../common/commoncss.js"></script>
+  <style>
+    label{
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <ol class="breadcrumb pull-right">
+    <li><a href="javascript:;">库存管理</a>
+    </li>
+    <li><a href="javascript:;">库存一览</a>
+    </li>
+  </ol>
+  <h2 class="page-header">库存一览</h2>
+  <hr />
+  <div id="myHeader" class="row">
+    <form class="form-horizontal">
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">VIN码</label>
+        <div class="col-sm-9">
+          <input type="text" id="inVin" name="vin" class="form-control justEnglish" maxlength="30">
+
+        </div>
+      </div>
+
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">库区</label>
+        <div class="col-sm-9">
+          <select id="selStockArea" name="stockArea" data-live-search="false" class="form-control" data-type="STOCK_AREA_LIST_WITH_WAREHOUSE">
+          </select>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">入库日期</label>
+        <div class="col-sm-9">
+          <input id="date" type="text" class="form-control" name="warehouseDate" data-type="DATAPICKER">
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">状态</label>
+        <div class="col-sm-9">
+          <select id="selcarStatus" v-cloak name="carStatus" class="form-control">
+            <option value=""></option>
+            <option v-for="(initoption, index) in initoptions" :value="initoption.subCode">{{initoption.subName}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group col-sm-4">
+        <label class="col-sm-3 control-label">成品库</label>
+        <div class="col-sm-9">
+          <select id="selProductStock" name="productStockCode" data-live-search="false" class="form-control" data-type="PRODUCT_STOCK_LIST">
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group col-sm-4 ">
+        <div class="row pull-right">
+          <button type="button" id="btnSearch" class="btn btn-primary">查询</button>
+          <button type="button" id="btnExport" class="btn btn-primary">导出</button>
+          <button type="button" id="btnLock" class="btn btn-success">批量更新</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <audio id="infomp3" autoplay="autoplay"></audio>
+  <div id="myContent" class="row">
+    <div class="col-xs-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <table id="tableBox" class="table table-bordered table-datas" style="min-width:100%"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--批量更新弹窗-->
+
+  <div class="modal fade" data-backdrop="static" date-keyboard="false" id="modelLock">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close closedel" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">批量更新</h4>
+        </div>
+        <div class="modal-body col-sm-12">
+          <form id="form-id" class="form-horizontal">
+            <div class="form-group">
+              <label class="col-sm-2 control-label myRequired">状态</label>
+              <div class="col-sm-9">
+                <select id="selLock" v-cloak class="form-control validate[required]">
+                  <option value=""></option>
+                  <option v-for="(option, index) in options" :value="option.subCode">{{option.subName}}</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-2 control-label ">理由</label>
+              <div class="col-sm-9">
+                <input id="reason" type="text" class="form-control" maxlength="50">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-2 control-label myRequired">VIN码</label>
+              <div class="col-sm-9">
+                <textarea id="area" class="form-control validate[required] form-control justEnglish" rows="5" cols="5" style="resize:none" wrap="virtual"></textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button id="submitClose" type="button" class="closedel btn btn-sm btn-white" data-dismiss="modal">关闭</button>
+          <button id="submitBatch" type="button" class="btn btn-sm btn-success">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 共通js -->
+  <script src="../../common/commonjs.js"></script>
+  <script src="js/argoxPrint.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>

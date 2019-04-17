@@ -1,0 +1,31 @@
+td.nopadding{
+    padding: 0!important;
+}
+
+td.nopadding input{
+    border: none;
+    border-radius: 0;
+    width: 100%;
+    height: 32px;
+}
+
+input.inpleft{
+    border-top-right-radius:0;
+    border-bottom-right-radius:0;
+}
+
+input.inpright{
+    border-bottom-left-radius:0;
+    border-left:0px;
+    border-top-left-radius:0;
+}
+
+table label{
+    height: fit-content;
+    color: #707478;
+    font-weight: unset;
+}
+
+table tr.failed td{
+    background: #F5DEB3;
+}
